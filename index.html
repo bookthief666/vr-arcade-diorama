@@ -95,6 +95,7 @@
       <img id="character-img" src="assets/images/character.png">
       <img id="sigil-custom-img" src="assets/images/sigil_custom.png">
           <a-asset-item id="arcade-glb" src="assets/models/arcade.glb"></a-asset-item>
+          <img id="floor-led-pattern-img" src="assets/images/floor_led_pattern.png">
     </a-assets>
 
     <!-- PLAYER: average standing viewer, eye height around 1.6m -->
@@ -358,6 +359,29 @@
     <a-box position="-2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
     <a-box position="2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
     <a-box position="0 0.035 -2.35" width="4.2" height="0.05" depth="0.04" material="shader: flat; color: #450016; opacity: 0.18; transparent: true"></a-box>
-  </a-scene>
+  <a-entity id="led-floor-group">
+      <!-- main tiled LED pattern -->
+      <a-plane
+        id="led-floor-pattern"
+        position="0 0.021 -1.30"
+        rotation="-90 0 0"
+        width="4.2"
+        height="4.2"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.92; side: double"
+      ></a-plane>
+
+      <!-- soft fake glow pass -->
+      <a-plane
+        id="led-floor-glow"
+        position="0 0.018 -1.30"
+        rotation="-90 0 0"
+        width="4.35"
+        height="4.35"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.18; side: double"
+        animation__pulse="property: material.opacity; from: 0.10; to: 0.24; dir: alternate; dur: 1800; easing: easeInOutSine; loop: true"
+      ></a-plane>
+    </a-entity>
+
+    </a-scene>
 </body>
 </html>
