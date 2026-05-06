@@ -93,6 +93,7 @@
       <img id="background-clean" src="assets/images/background_clean.jpg">
       <img id="reference-full" src="assets/images/reference_full.jpg">
       <img id="character-img" src="assets/images/character.png">
+      <img id="sigil-custom-img" src="assets/images/sigil_custom.png">
           <a-asset-item id="arcade-glb" src="assets/models/arcade.glb"></a-asset-item>
     </a-assets>
 
@@ -154,6 +155,34 @@
       rotation="0 10 0"
       scale="1.55 1.55 1.55"
     ></a-gltf-model>
+
+    <a-entity
+      id="custom-neon-sigil"
+      position="1.78 2.30 -3.20"
+      rotation="0 -8 0"
+      animation__spin="property: rotation; from: 0 -8 0; to: 0 352 0; loop: true; dur: 26000; easing: linear"
+      animation__pulse="property: scale; from: 1 1 1; to: 1.05 1.05 1.05; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+    >
+      <!-- glow layer -->
+      <a-image
+        id="custom-neon-sigil-glow"
+        src="#sigil-custom-img"
+        position="0 0 0"
+        width="2.25"
+        height="2.25"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.22; side: double"
+      ></a-image>
+
+      <!-- crisp main layer -->
+      <a-image
+        id="custom-neon-sigil-core"
+        src="#sigil-custom-img"
+        position="0 0 0.01"
+        width="1.95"
+        height="1.95"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double"
+      ></a-image>
+    </a-entity>
 
     <a-image
       id="character-cutout"
