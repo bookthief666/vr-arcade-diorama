@@ -101,6 +101,7 @@
 </head>
 
 <body>
+  <audio id="arcade-theme-audio" preload="auto" loop playsinline></audio>
   <button id="audio-start">START AUDIO</button>
   <div id="notice">
     GEIST Arcade VR Diorama v3 — human-scale composition. Next step: replace placeholders with sliced image assets.
@@ -1171,12 +1172,6 @@
           animation__float="property: position; from: 1.75 1.88 -3.28; to: 1.68 2.08 -3.23; dir: alternate; loop: true; dur: 2500; easing: easeInOutSine"></a-sphere>
       </a-entity>
     </a-entity>
-
-  
-    <a-entity
-      id="arcade-theme-sound"
-      sound="autoplay: false; loop: true; volume: 0.58; positional: false"
-    ></a-entity>
   </a-scene>
 
 <script>
@@ -1645,36 +1640,113 @@ if (window.AFRAME && !AFRAME.components["bounded-vr-locomotion"]) {
 <script id="audio-start-handler">
 window.addEventListener("load", function () {
   const btn = document.getElementById("audio-start");
-  const soundEntity = document.getElementById("arcade-theme-sound");
+  const audio = document.getElementById("arcade-theme-audio");
 
   const playlist = [
-    { title: "Forget Me Remix 93", src: "url(assets/audio/track_01_forget_me.wav)" },
-    { title: "Forest", src: "url(assets/audio/track_02_forest.mp3)" },
-    { title: "The Zelda Song", src: "url(assets/audio/track_03_zelda.mp3)" },
-    { title: "1950s Void Theory", src: "url(assets/audio/track_04_1950s_void.mp3)" },
-    { title: "Here's RD", src: "url(assets/audio/track_05_heres_rd.mp3)" }
+    { title: "Forget Me Remix 93", src: "assets/audio/track_01_forget_me.wav" },
+    { title: "Forest", src: "assets/audio/track_02_forest.mp3" },
+    { title: "The Zelda Song", src: "assets/audio/track_03_zelda.mp3" },
+    { title: "1950s Void Theory", src: "assets/audio/track_04_1950s_void.mp3" },
+    { title: "Here's RD", src: "assets/audio/track_05_heres_rd.mp3" }
   ];
 
-  if (!btn || !soundEntity) return;
+  if (!btn || !audio) return;
 
   const selected = playlist[Math.floor(Math.random() * playlist.length)];
-  soundEntity.setAttribute("sound", "src", selected.src);
 
-  btn.textContent = "START AUDIO — " + selected.title;
+  audio.src = selected.src;
+  audio.loop = true;
+  audio.volume = 0.58;
+  audio.preload = "auto";
 
-  btn.addEventListener("click", function () {
-    const comp = soundEntity.components.sound;
-    if (!comp) return;
+  let started = false;
 
-    if (btn.classList.contains("playing")) {
-      comp.pauseSound();
-      btn.classList.remove("playing");
-      btn.textContent = "START AUDIO — " + selected.title;
-    } else {
-      comp.playSound();
-      btn.classList.add("playing");
-      btn.textContent = "AUDIO ON — " + selected.title;
+  function setReady(label) {
+    started = false;
+    btn.classList.remove("playing");
+    btn.style.display = "block";
+    btn.textContent = label || ("TAP TO START — " + selected.title);
+  }
+
+  function setPlaying() {
+    started = true;
+    btn.classList.add("playing");
+    btn.textContent = "AUDIO ON — " + selected.title;
+  }
+
+  async function startAudio() {
+    try {
+      audio.muted = false;
+      audio.volume = 0.58;
+
+      const result = audio.play();
+
+      // Modern browsers return a Promise. Trust only resolved playback.
+      if (result && typeof result.then === "function") {
+        await result;
+      }
+
+      if (!audio.paused) {
+        setPlaying();
+        return true;
+      }
+
+      setReady("TAP TO START — " + selected.title);
+      return false;
+    } catch (err) {
+      setReady("TAP TO START — " + selected.title);
+      return false;
     }
+  }
+
+  function stopAudio() {
+    audio.pause();
+    setReady("START AUDIO — " + selected.title);
+  }
+
+  // Initial state.
+  setReady("LOADING AUDIO — " + selected.title);
+
+  // Try autoplay, but do not lie if browser blocks it.
+  setTimeout(function () {
+    startAudio();
+  }, 800);
+
+  // First actual user gesture should unlock audio.
+  const unlock = function () {
+    startAudio();
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("touchstart", unlock);
+    window.removeEventListener("click", unlock);
+  };
+
+  window.addEventListener("pointerdown", unlock);
+  window.addEventListener("touchstart", unlock);
+  window.addEventListener("click", unlock);
+
+  // Manual toggle button.
+  btn.addEventListener("click", function (event) {
+    event.stopPropagation();
+
+    if (started && !audio.paused) {
+      stopAudio();
+    } else {
+      startAudio();
+    }
+  });
+
+  // Extra truth-check: if playback fails later, reflect it.
+  audio.addEventListener("pause", function () {
+    if (started) setReady("START AUDIO — " + selected.title);
+  });
+
+  audio.addEventListener("playing", function () {
+    setPlaying();
+  });
+
+  audio.addEventListener("error", function () {
+    setReady("AUDIO ERROR — " + selected.title);
+    console.warn("Audio failed to load:", selected.src, audio.error);
   });
 });
 </script>
