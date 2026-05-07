@@ -29,6 +29,28 @@
       max-width: 340px;
       text-shadow: 0 0 8px #ff0030;
     }
+  
+    #audio-start {
+      position: fixed;
+      left: 12px;
+      bottom: 14px;
+      z-index: 20;
+      border: 1px solid rgba(255, 0, 64, 0.65);
+      background: rgba(0, 0, 0, 0.72);
+      color: #ff355d;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 8px #ff0038;
+      box-shadow: 0 0 18px rgba(255, 0, 64, 0.25);
+    }
+
+    #audio-start.playing {
+      color: #8dffda;
+      border-color: rgba(0, 255, 190, 0.6);
+      text-shadow: 0 0 8px #00ffc8;
+    }
   </style>
 
   <script>
@@ -79,6 +101,7 @@
 </head>
 
 <body>
+  <button id="audio-start">START AUDIO</button>
   <div id="notice">
     GEIST Arcade VR Diorama v3 — human-scale composition. Next step: replace placeholders with sliced image assets.
   </div>
@@ -1149,6 +1172,11 @@
       </a-entity>
     </a-entity>
 
+  
+    <a-entity
+      id="arcade-theme-sound"
+      sound="autoplay: false; loop: true; volume: 0.58; positional: false"
+    ></a-entity>
   </a-scene>
 
 <script>
@@ -1611,6 +1639,44 @@ if (window.AFRAME && !AFRAME.components["bounded-vr-locomotion"]) {
     }
   });
 }
+</script>
+
+
+<script id="audio-start-handler">
+window.addEventListener("load", function () {
+  const btn = document.getElementById("audio-start");
+  const soundEntity = document.getElementById("arcade-theme-sound");
+
+  const playlist = [
+    { title: "Forget Me Remix 93", src: "url(assets/audio/track_01_forget_me.wav)" },
+    { title: "Forest", src: "url(assets/audio/track_02_forest.mp3)" },
+    { title: "The Zelda Song", src: "url(assets/audio/track_03_zelda.mp3)" },
+    { title: "1950s Void Theory", src: "url(assets/audio/track_04_1950s_void.mp3)" },
+    { title: "Here's RD", src: "url(assets/audio/track_05_heres_rd.mp3)" }
+  ];
+
+  if (!btn || !soundEntity) return;
+
+  const selected = playlist[Math.floor(Math.random() * playlist.length)];
+  soundEntity.setAttribute("sound", "src", selected.src);
+
+  btn.textContent = "START AUDIO — " + selected.title;
+
+  btn.addEventListener("click", function () {
+    const comp = soundEntity.components.sound;
+    if (!comp) return;
+
+    if (btn.classList.contains("playing")) {
+      comp.pauseSound();
+      btn.classList.remove("playing");
+      btn.textContent = "START AUDIO — " + selected.title;
+    } else {
+      comp.playSound();
+      btn.classList.add("playing");
+      btn.textContent = "AUDIO ON — " + selected.title;
+    }
+  });
+});
 </script>
 
 </body>
