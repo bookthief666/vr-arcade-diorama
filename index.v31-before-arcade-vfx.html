@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GEIST Arcade VR Diorama</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #020006;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+    }
+
+    #notice {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      color: #ff3448;
+      background: rgba(0, 0, 0, 0.66);
+      border: 1px solid rgba(255, 0, 48, 0.5);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      max-width: 340px;
+      text-shadow: 0 0 8px #ff0030;
+    }
+  </style>
+
+  <script>
+    AFRAME.registerComponent('pulse-opacity', {
+      schema: {
+        min: { default: 0.35 },
+        max: { default: 0.95 },
+        speed: { default: 0.0018 }
+      },
+      tick: function (time) {
+        const t = (Math.sin(time * this.data.speed) + 1) / 2;
+        const opacity = this.data.min + (this.data.max - this.data.min) * t;
+        this.el.setAttribute('material', 'opacity', opacity);
+      }
+    });
+
+    AFRAME.registerComponent('slow-drift', {
+      schema: {
+        amount: { default: 0.04 },
+        speed: { default: 0.001 },
+        axis: { default: 'y' }
+      },
+      init: function () {
+        this.base = this.el.object3D.position.clone();
+      },
+      tick: function (time) {
+        const offset = Math.sin(time * this.data.speed) * this.data.amount;
+        if (this.data.axis === 'x') this.el.object3D.position.x = this.base.x + offset;
+        if (this.data.axis === 'y') this.el.object3D.position.y = this.base.y + offset;
+        if (this.data.axis === 'z') this.el.object3D.position.z = this.base.z + offset;
+      }
+    });
+
+    AFRAME.registerComponent('clamp-player', {
+      schema: {
+        minX: { default: -1.65 },
+        maxX: { default: 1.65 },
+        minZ: { default: -1.35 },
+        maxZ: { default: 1.25 }
+      },
+      tick: function () {
+        const p = this.el.object3D.position;
+        p.x = Math.max(this.data.minX, Math.min(this.data.maxX, p.x));
+        p.z = Math.max(this.data.minZ, Math.min(this.data.maxZ, p.z));
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <div id="notice">
+    GEIST Arcade VR Diorama v3 — human-scale composition. Next step: replace placeholders with sliced image assets.
+  </div>
+
+  <a-scene
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false"
+    background="color: #020006"
+    fog="type: exponential; color: #040007; density: 0.032"
+    xr-mode-ui="enabled: true"
+  >
+    <a-assets>
+      <img id="unicursal-bolt" src="assets/images/unicursal_bolt_red_alpha.png">
+      <img id="background-clean" src="assets/images/background_clean.jpg">
+      <img id="reference-full" src="assets/images/reference_full.jpg">
+      <img id="character-img" src="assets/images/character.png">
+      <img id="sigil-custom-img" src="assets/images/sigil_custom.png">
+          <a-asset-item id="arcade-glb" src="assets/models/arcade.glb"></a-asset-item>
+          <img id="floor-led-pattern-img" src="assets/images/floor_led_pattern.png">
+          <a-asset-item id="character-glb" src="assets/models/character.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- PLAYER: average standing viewer, eye height around 1.6m -->
+    <a-entity
+      id="player"
+      position="0 1.6 1.25"
+      clamp-player="minX: -1.65; maxX: 1.65; minZ: -1.35; maxZ: 1.25"
+    >
+      <a-entity
+        camera
+        look-controls="touchEnabled: true; mouseEnabled: true"
+        wasd-controls="acceleration: 26; fly: false"
+      ></a-entity>
+    </a-entity>
+
+    <!-- DARK SKY: do not put the painting here later; this remains abstract/cosmic -->
+    <a-sky color="#010004"></a-sky>
+
+    <!-- MINIMAL LIGHTING: most glow is faked with flat/emissive-looking materials -->
+    <a-entity light="type: ambient; color: #2a0b1a; intensity: 0.7"></a-entity>
+    <a-entity light="type: point; color: #ff0038; intensity: 1.25; distance: 5.8" position="1.78 2.25 -3.45"></a-entity>
+    <a-entity light="type: point; color: #3388ff; intensity: 0.58; distance: 3.8" position="-1.48 1.55 -2.45"></a-entity>
+
+    <!-- FLOOR / STAGE -->
+    <a-plane
+      id="stage-floor"
+      position="0 0 -1.15"
+      rotation="-90 0 0"
+      width="4.25"
+      height="4.25"
+      material="color: #070512; roughness: 0.78; metalness: 0.04"
+    ></a-plane>
+
+    <!-- FOREGROUND TABLE/FLOOR ZONE: this approximates the source image's neon surface -->
+    <a-plane
+      id="foreground-surface"
+      position="-0.7 0.018 -0.72"
+      rotation="-90 0 0"
+      width="3.05"
+      height="1.55"
+      material="shader: flat; color: #10103a; opacity: 0.72; transparent: true"
+    ></a-plane>
+
+    <!-- BACKDROP: big flat plane now; later this receives background_clean.jpg -->
+    <a-image
+      id="reference-backplate"
+      src="#background-clean"
+      position="0 2.12 -4.55"
+      width="4.8"
+      height="4.8"
+      material="shader: flat; transparent: true; opacity: 0.45; side: double"
+    ></a-image>
+
+    <a-gltf-model
+      id="arcade-model"
+      src="#arcade-glb"
+      position="-1.25 0 -2.28"
+      rotation="0 10 0"
+      scale="1.55 1.55 1.55"
+    ></a-gltf-model>
+
+    <a-entity
+      id="custom-neon-sigil"
+      position="1.78 2.30 -3.20"
+      rotation="0 -8 0"
+      animation__spin="property: rotation; from: 0 -8 0; to: 0 352 0; loop: true; dur: 26000; easing: linear"
+      animation__pulse="property: scale; from: 1 1 1; to: 1.05 1.05 1.05; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+    >
+      <!-- glow layer -->
+      <a-image
+        id="custom-neon-sigil-glow"
+        src="#sigil-custom-img"
+        position="0 0 0"
+        width="2.25"
+        height="2.25"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.22; side: double"
+      ></a-image>
+
+      <!-- crisp main layer -->
+      <a-image
+        id="custom-neon-sigil-core"
+        src="#sigil-custom-img"
+        position="0 0 0.01"
+        width="1.95"
+        height="1.95"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double"
+      ></a-image>
+    </a-entity>
+
+    <a-entity id="character-light-rig">
+      <!-- soft front fill so the 3D character is not a black silhouette -->
+      <a-entity
+        light="type: point; color: #ffd0c8; intensity: 2.2; distance: 4.0; decay: 1.4"
+        position="0.25 2.15 0.15"
+      ></a-entity>
+
+      <!-- cool arcade-blue rim light -->
+      <a-entity
+        light="type: point; color: #4f8cff; intensity: 1.15; distance: 3.5; decay: 1.6"
+        position="-1.25 1.75 -1.20"
+      ></a-entity>
+
+      <!-- red sigil/back glow -->
+      <a-entity
+        light="type: point; color: #ff1a44; intensity: 1.45; distance: 4.2; decay: 1.5"
+        position="1.75 2.05 -2.85"
+      ></a-entity>
+    </a-entity>
+
+    <a-gltf-model
+      id="character-model"
+      src="#character-glb"
+      position="0.63 0 -1.52"
+      rotation="0 -4 0"
+      scale="1.50 1.50 1.50"
+    ></a-gltf-model>
+
+    <a-image
+      id="character-cutout" visible="false"
+      src="#character-img"
+      position="0.38 1.42 -2.08"
+      rotation="0 -3 0"
+      width="1.48"
+      height="2.96"
+      material="shader: flat; transparent: true; alphaTest: 0.01; side: double"
+    ></a-image>
+
+    <!-- WRAP PANELS: theatrical set walls, not a literal room -->
+    <a-plane
+      id="backdrop-left"
+      position="-3.68 2.05 -3.05"
+      rotation="0 34 0"
+      width="3.4"
+      height="4.5"
+      material="shader: flat; color: #03040d; opacity: 1"
+    ></a-plane>
+
+    <a-plane
+      id="backdrop-right"
+      position="3.72 2.05 -3.05"
+      rotation="0 -34 0"
+      width="3.4"
+      height="4.5"
+      material="shader: flat; color: #03040d; opacity: 1"
+    ></a-plane>
+
+    <!-- STARFIELD / RED MOTES -->
+    <a-entity id="stars">
+      <a-sphere position="-3.0 3.1 -4.08" radius="0.014" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-2.45 2.48 -3.7" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="-2.05 3.28 -4.18" radius="0.014" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-1.52 2.83 -3.92" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="-1.04 3.36 -4.05" radius="0.016" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-0.5 2.62 -3.85" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="0.05 3.13 -4.1" radius="0.011" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="0.62 2.72 -3.75" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="1.18 3.26 -4.08" radius="0.017" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="1.73 2.58 -3.72" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="2.32 3.12 -4.07" radius="0.015" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="2.82 2.55 -3.78" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="3.08 3.32 -4.2" radius="0.013" color="#ff2944" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- ARCADE CABINET: more like v1, slightly uncanny, left-side anchor -->
+    <a-entity id="arcade" visible="false" position="-1.35 0 -2.42" rotation="0 7 -2">
+      <!-- lower body -->
+      <a-box
+        position="0 0.84 0"
+        width="0.86"
+        height="1.68"
+        depth="0.58"
+        color="#020205"
+        material="roughness: 0.34; metalness: 0.38"
+      ></a-box>
+
+      <!-- upper body / monitor shell -->
+      <a-box
+        position="0 1.55 0.02"
+        width="1.02"
+        height="0.96"
+        depth="0.62"
+        color="#030306"
+        material="roughness: 0.34; metalness: 0.42"
+      ></a-box>
+
+      <!-- marquee -->
+      <a-box
+        position="0 2.18 0.03"
+        width="1.14"
+        height="0.34"
+        depth="0.66"
+        color="#05050a"
+        material="roughness: 0.28; metalness: 0.45"
+      ></a-box>
+
+      <a-plane
+        position="0 2.19 0.366"
+        width="0.95"
+        height="0.2"
+        material="shader: flat; color: #ff5a2d; opacity: 0.8; transparent: true"
+      ></a-plane>
+
+      <!-- red side trim / silhouette -->
+      <a-box position="-0.55 1.22 0.035" width="0.04" height="2.22" depth="0.68" color="#ff0038" material="shader: flat"></a-box>
+      <a-box position="0.55 1.22 0.035" width="0.04" height="2.22" depth="0.68" color="#ff0038" material="shader: flat"></a-box>
+      <a-box position="0 2.37 0.035" width="1.08" height="0.04" depth="0.68" color="#ff0038" material="shader: flat"></a-box>
+
+      <!-- screen bezel -->
+      <a-box
+        position="0 1.55 0.34"
+        width="0.82"
+        height="0.64"
+        depth="0.045"
+        color="#050509"
+      ></a-box>
+
+      <!-- screen -->
+      <a-plane
+        position="0 1.55 0.368"
+        width="0.68"
+        height="0.49"
+        material="shader: flat; color: #519bff; opacity: 0.96"
+        animation="property: material.opacity; dir: alternate; dur: 1900; easing: easeInOutSine; loop: true; to: 0.72"
+      ></a-plane>
+
+      <a-text
+        value="GEIST"
+        position="-0.19 1.55 0.377"
+        scale="0.26 0.26 0.26"
+        color="#ffffff"
+        align="center"
+      ></a-text>
+
+      <!-- control deck -->
+      <a-box
+        position="0 0.94 0.38"
+        rotation="-17 0 0"
+        width="0.88"
+        height="0.13"
+        depth="0.44"
+        color="#090912"
+      ></a-box>
+
+      <!-- buttons and joystick -->
+      <a-cylinder position="-0.16 1.03 0.58" rotation="90 0 0" radius="0.052" height="0.028" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-cylinder position="0.04 1.03 0.58" rotation="90 0 0" radius="0.052" height="0.028" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-cylinder position="0.24 1.03 0.55" rotation="90 0 0" radius="0.048" height="0.028" color="#191922"></a-cylinder>
+
+      <a-cylinder position="-0.34 1.08 0.53" radius="0.018" height="0.18" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-sphere position="-0.34 1.2 0.53" radius="0.06" color="#ff0038" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- CHARACTER PLACEHOLDER: human-scale marker, deliberately subdued until PNG replacement -->
+    <!-- character-placeholder hidden during reference calibration -->
+<!-- BACK SIGIL: larger, more dominant, behind/right of figure -->
+    <!-- back-sigil placeholder hidden during reference calibration -->
+<a-entity line="start: 0.68 -0.39 0.02; end: 0 0.76 0.02; color: #ff0038"></a-entity>
+      <a-entity line="start: 0 0.76 0.02; end: -0.68 -0.39 0.02; color: #ff0038"></a-entity>
+
+      <a-entity line="start: -0.48 0.36 0.025; end: 0.48 0.36 0.025; color: #ff0038"></a-entity>
+      <a-entity line="start: 0.48 0.36 0.025; end: 0 -0.62 0.025; color: #ff0038"></a-entity>
+      <a-entity line="start: 0 -0.62 0.025; end: -0.48 0.36 0.025; color: #ff0038"></a-entity>
+
+      <!-- small drop node -->
+      <a-cylinder position="0 -1.03 0.04" radius="0.012" height="0.36" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-sphere position="0 -1.22 0.04" radius="0.045" color="#ff0038" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- FLOOR SIGIL: foreground anchor -->
+    <a-entity id="floor-sigil" position="-0.98 0.04 -0.72" rotation="-90 0 -8">
+      <a-circle
+        radius="0.62"
+        material="shader: flat; color: #ff0038; opacity: 0.06; transparent: true; side: double"
+        pulse-opacity="min: 0.025; max: 0.11; speed: 0.0022"
+      ></a-circle>
+
+      <a-ring
+        radius-inner="0.48"
+        radius-outer="0.52"
+        material="shader: flat; color: #ff0038; opacity: 0.75; transparent: true; side: double"
+        pulse-opacity="min: 0.32; max: 0.84; speed: 0.0028"
+      ></a-ring>
+    </a-entity>
+
+    <!-- RIGHT-SIDE HANGING LIGHT STRANDS -->
+    <!-- hanging-lights placeholder hidden during reference calibration -->
+<!-- WALKABLE BOUNDARY: visible for development, later make invisible -->
+    <a-box position="0 0.035 1.25" width="4.2" height="0.05" depth="0.04" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="-2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="0 0.035 -2.35" width="4.2" height="0.05" depth="0.04" material="shader: flat; color: #450016; opacity: 0.18; transparent: true"></a-box>
+  <a-entity id="led-floor-group">
+      <!-- main tiled LED pattern -->
+      <a-plane
+        id="led-floor-pattern"
+        position="0 0.021 -1.30"
+        rotation="-90 0 0"
+        width="4.2"
+        height="4.2"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.92; side: double"
+      ></a-plane>
+
+      <!-- soft fake glow pass -->
+      <a-plane
+        id="led-floor-glow"
+        position="0 0.018 -1.30"
+        rotation="-90 0 0"
+        width="4.35"
+        height="4.35"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.18; side: double"
+        animation__pulse="property: material.opacity; from: 0.10; to: 0.24; dir: alternate; dur: 1800; easing: easeInOutSine; loop: true"
+      ></a-plane>
+    </a-entity>
+
+    <!-- FLOOR HOLOGRAM SCREEN / RECESSED WELL -->
+    
+
+
+
+<!-- outer hypercube-ish frame -->
+      
+
+
+      <!-- inner hypercube-ish frame -->
+      
+
+
+      <!-- soft glow halo -->
+      
+
+    </a-entity>
+
+
+  
+    <!-- FLOOR SCREEN: flat under-glass shifting geometry inside the existing red ring -->
+    
+
+
+
+  
+    <!-- centered floor hologram cluster inside existing ring -->
+    
+
+
+  
+    <!-- three floor projector circles -->
+
+    
+
+
+    
+
+
+    
+
+
+  
+    <!-- five small symmetric floor projectors -->
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    <!-- five equal floor projectors in pentagram-style arrangement under the girl -->
+
+    <a-entity id="projector-a" position="0.62 0.036 -1.82">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 7600; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="projector-b" position="0.95 0.036 -1.56">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 360; to: 0 0 0; loop: true; dur: 6400; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="projector-c" position="0.82 0.036 -1.18">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 7000; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="projector-d" position="0.42 0.036 -1.18">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 360; to: 0 0 0; loop: true; dur: 6700; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="projector-e" position="0.29 0.036 -1.56">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 7300; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+  
+    <!-- Left floor portal: dark screen + red lightning unicursal-hexagram-style sigil -->
+    <a-entity
+      id="left-floor-lightning-portal"
+      position="-1.01 0.039 -0.86"
+      rotation="-90 0 0"
+      left-portal-unicursal
+    ></a-entity>
+
+  </a-scene>
+
+<script>
+if (window.AFRAME) {
+  if (!AFRAME.components["flicker-material"]) {
+    AFRAME.registerComponent("flicker-material", {
+      schema: {
+        min: {default: 0.18},
+        max: {default: 1.0},
+        speed: {default: 90}
+      },
+      init: function () {
+        this.timer = 0;
+      },
+      tick: function (time, dt) {
+        this.timer += dt;
+        if (this.timer > this.data.speed + Math.random() * 140) {
+          this.timer = 0;
+          const strong = Math.random() > 0.18;
+          const opacity = strong
+            ? this.data.min + Math.random() * (this.data.max - this.data.min)
+            : 0.03 + Math.random() * 0.12;
+          const intensity = strong
+            ? 1.1 + Math.random() * 2.2
+            : 0.2 + Math.random() * 0.6;
+
+          this.el.setAttribute("material", "opacity", opacity);
+          this.el.setAttribute("material", "emissiveIntensity", intensity);
+        }
+      }
+    });
+  }
+
+  if (!AFRAME.components["left-portal-unicursal"]) {
+    AFRAME.registerComponent("left-portal-unicursal", {
+      init: function () {
+        const el = this.el;
+
+        // dark screen inside the existing ring
+        const screen = document.createElement("a-circle");
+        screen.setAttribute("radius", "0.31");
+        screen.setAttribute("position", "0 0 -0.004");
+        screen.setAttribute("material", "shader: flat; color: #220015; opacity: 0.92; transparent: true");
+        el.appendChild(screen);
+
+        // soft inner glow
+        const glowDisc = document.createElement("a-circle");
+        glowDisc.setAttribute("radius", "0.23");
+        glowDisc.setAttribute("position", "0 0 -0.003");
+        glowDisc.setAttribute("material", "shader: flat; color: #370018; opacity: 0.24; transparent: true");
+        el.appendChild(glowDisc);
+
+        const group = document.createElement("a-entity");
+        group.setAttribute("id", "left-portal-unicursal-lines");
+        el.appendChild(group);
+
+        // approximate unicursal hexagram path
+        const pts = [
+          [ 0.00,  0.22],
+          [ 0.12,  0.07],
+          [ 0.29,  0.07],
+          [ 0.12, -0.05],
+          [ 0.21, -0.22],
+          [ 0.00, -0.09],
+          [-0.21, -0.22],
+          [-0.12, -0.05],
+          [-0.29,  0.07],
+          [-0.12,  0.07],
+          [ 0.00,  0.22]
+        ];
+
+        function addSegment(a, b, thickness = 0.016) {
+          const dx = b[0] - a[0];
+          const dy = b[1] - a[1];
+          const len = Math.sqrt(dx * dx + dy * dy);
+          const mx = (a[0] + b[0]) / 2;
+          const my = (a[1] + b[1]) / 2;
+          const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+
+          // outer glow strip
+          const glow = document.createElement("a-box");
+          glow.setAttribute("position", `${mx} ${my} 0.002`);
+          glow.setAttribute("width", (len + 0.010).toFixed(4));
+          glow.setAttribute("height", (thickness * 2.1).toFixed(4));
+          glow.setAttribute("depth", "0.004");
+          glow.setAttribute("rotation", `0 0 ${ang}`);
+          glow.setAttribute("material", "shader: flat; color: #ff3355; opacity: 0.18; transparent: true");
+          glow.setAttribute("flicker-material", "min: 0.05; max: 0.22; speed: 70");
+          group.appendChild(glow);
+
+          // bright core strip
+          const core = document.createElement("a-box");
+          core.setAttribute("position", `${mx} ${my} 0.006`);
+          core.setAttribute("width", len.toFixed(4));
+          core.setAttribute("height", thickness.toFixed(4));
+          core.setAttribute("depth", "0.008");
+          core.setAttribute("rotation", `0 0 ${ang}`);
+          core.setAttribute(
+            "material",
+            "color: #ff4466; emissive: #ff002a; emissiveIntensity: 2.4; opacity: 0.95; transparent: true"
+          );
+          core.setAttribute("flicker-material", "min: 0.32; max: 1.0; speed: 85");
+          group.appendChild(core);
+        }
+
+        for (let i = 0; i < pts.length - 1; i++) {
+          addSegment(pts[i], pts[i + 1]);
+        }
+
+        // small center spark
+        const spark = document.createElement("a-circle");
+        spark.setAttribute("radius", "0.022");
+        spark.setAttribute("position", "0 0 0.008");
+        spark.setAttribute("material", "shader: flat; color: #ff6680; opacity: 0.95; transparent: true");
+        spark.setAttribute("flicker-material", "min: 0.25; max: 1.0; speed: 60");
+        group.appendChild(spark);
+      }
+    });
+  }
+}
+</script>
+
+
+<script>
+if (window.AFRAME && !AFRAME.components["portal-bolt-v2"]) {
+  AFRAME.registerComponent("portal-bolt-v2", {
+    init: function () {
+      const el = this.el;
+
+      // wipe old portal children so the previous wrong sigil disappears
+      while (el.firstChild) el.removeChild(el.firstChild);
+
+      this.boundary = 0.095;   // movement radius inside the circle
+      this.pos = { x: 0, y: 0 };
+      this.vel = { x: 0.065, y: 0.048 };
+      this.spin = 0;
+
+      // dark screen inside the red ring
+      const screen = document.createElement("a-circle");
+      screen.setAttribute("radius", "0.315");
+      screen.setAttribute("position", "0 0 -0.004");
+      screen.setAttribute("material", "shader: flat; color: #170014; opacity: 0.94; transparent: true; side: double");
+      el.appendChild(screen);
+
+      // subtle inner glow
+      const inner = document.createElement("a-circle");
+      inner.setAttribute("radius", "0.255");
+      inner.setAttribute("position", "0 0 -0.003");
+      inner.setAttribute("material", "shader: flat; color: #2a0018; opacity: 0.22; transparent: true; side: double");
+      el.appendChild(inner);
+
+      // moving group
+      this.mover = document.createElement("a-entity");
+      this.mover.setAttribute("position", "0 0 0.008");
+      el.appendChild(this.mover);
+
+      // glow copy behind the main sigil
+      this.glow = document.createElement("a-image");
+      this.glow.setAttribute("src", "#unicursal-bolt");
+      this.glow.setAttribute("width", "0.54");
+      this.glow.setAttribute("height", "0.54");
+      this.glow.setAttribute("position", "0 0 0");
+      this.glow.setAttribute("material", "shader: flat; transparent: true; opacity: 0.24; alphaTest: 0.02; side: double");
+      this.mover.appendChild(this.glow);
+
+      // main sigil
+      this.bolt = document.createElement("a-image");
+      this.bolt.setAttribute("src", "#unicursal-bolt");
+      this.bolt.setAttribute("width", "0.44");
+      this.bolt.setAttribute("height", "0.44");
+      this.bolt.setAttribute("position", "0 0 0.003");
+      this.bolt.setAttribute("material", "shader: flat; transparent: true; opacity: 0.96; alphaTest: 0.02; side: double");
+      this.mover.appendChild(this.bolt);
+
+      // tiny center spark
+      this.spark = document.createElement("a-circle");
+      this.spark.setAttribute("radius", "0.012");
+      this.spark.setAttribute("position", "0 0 0.006");
+      this.spark.setAttribute("material", "shader: flat; color: #ff4d6d; opacity: 0.75; transparent: true");
+      this.mover.appendChild(this.spark);
+    },
+
+    tick: function (time, dt) {
+      const sec = dt / 1000;
+
+      // drift
+      let nx = this.pos.x + this.vel.x * sec;
+      let ny = this.pos.y + this.vel.y * sec;
+
+      // bounce off circular perimeter
+      const d = Math.sqrt(nx * nx + ny * ny);
+      if (d > this.boundary) {
+        const n = { x: nx / d, y: ny / d };
+        const dot = this.vel.x * n.x + this.vel.y * n.y;
+        this.vel.x = this.vel.x - 2 * dot * n.x;
+        this.vel.y = this.vel.y - 2 * dot * n.y;
+
+        nx = n.x * this.boundary;
+        ny = n.y * this.boundary;
+      }
+
+      this.pos.x = nx;
+      this.pos.y = ny;
+
+      // slow spin
+      this.spin += dt * 0.018;
+
+      // lightning-style burst flicker: mostly alive, sometimes white-hot
+      const wave = Math.abs(Math.sin(time * 0.018));
+      const micro = Math.random();
+      const burst = micro > 0.90 ? 1.0 : 0.0;
+      const blackout = micro < 0.08 ? 1.0 : 0.0;
+
+      const flicker = blackout
+        ? 0.08 + Math.random() * 0.12
+        : Math.min(1.0, 0.45 + wave * 0.35 + burst * 0.55);
+
+      const glowFlicker = blackout
+        ? 0.05
+        : Math.min(0.52, 0.16 + wave * 0.16 + burst * 0.30);
+
+      const pulse = 1.05 + 0.12 * burst + 0.045 * Math.sin(time * 0.006);
+
+      this.mover.object3D.position.set(this.pos.x, this.pos.y, 0.008);
+      this.mover.object3D.rotation.z = this.spin * Math.PI / 180;
+
+      this.bolt.object3D.scale.set(pulse, pulse, 1);
+      this.glow.object3D.scale.set(1.12 * pulse, 1.12 * pulse, 1);
+
+      this.bolt.setAttribute("material", "opacity", flicker);
+      this.glow.setAttribute("material", "opacity", glowFlicker);
+      this.spark.setAttribute("material", "opacity", 0.35 + 0.4 * flicker);
+    }
+  });
+}
+
+// retarget the existing portal entity to the new component
+window.addEventListener("load", function () {
+  const portal = document.querySelector("#left-floor-lightning-portal");
+  if (!portal) return;
+
+  portal.removeAttribute("left-portal-unicursal");
+  portal.setAttribute("portal-bolt-v2", "");
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GEIST Arcade VR Diorama</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #020006;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+    }
+
+    #notice {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      color: #ff3448;
+      background: rgba(0, 0, 0, 0.66);
+      border: 1px solid rgba(255, 0, 48, 0.5);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      max-width: 340px;
+      text-shadow: 0 0 8px #ff0030;
+    }
+  </style>
+
+  <script>
+    AFRAME.registerComponent('pulse-opacity', {
+      schema: {
+        min: { default: 0.35 },
+        max: { default: 0.95 },
+        speed: { default: 0.0018 }
+      },
+      tick: function (time) {
+        const t = (Math.sin(time * this.data.speed) + 1) / 2;
+        const opacity = this.data.min + (this.data.max - this.data.min) * t;
+        this.el.setAttribute('material', 'opacity', opacity);
+      }
+    });
+
+    AFRAME.registerComponent('slow-drift', {
+      schema: {
+        amount: { default: 0.04 },
+        speed: { default: 0.001 },
+        axis: { default: 'y' }
+      },
+      init: function () {
+        this.base = this.el.object3D.position.clone();
+      },
+      tick: function (time) {
+        const offset = Math.sin(time * this.data.speed) * this.data.amount;
+        if (this.data.axis === 'x') this.el.object3D.position.x = this.base.x + offset;
+        if (this.data.axis === 'y') this.el.object3D.position.y = this.base.y + offset;
+        if (this.data.axis === 'z') this.el.object3D.position.z = this.base.z + offset;
+      }
+    });
+
+    AFRAME.registerComponent('clamp-player', {
+      schema: {
+        minX: { default: -1.65 },
+        maxX: { default: 1.65 },
+        minZ: { default: -1.35 },
+        maxZ: { default: 1.25 }
+      },
+      tick: function () {
+        const p = this.el.object3D.position;
+        p.x = Math.max(this.data.minX, Math.min(this.data.maxX, p.x));
+        p.z = Math.max(this.data.minZ, Math.min(this.data.maxZ, p.z));
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <div id="notice">
+    GEIST Arcade VR Diorama v3 — human-scale composition. Next step: replace placeholders with sliced image assets.
+  </div>
+
+  <a-scene
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false"
+    background="color: #020006"
+    fog="type: exponential; color: #040007; density: 0.032"
+    xr-mode-ui="enabled: true"
+  >
+    <a-assets>
+      <img id="background-clean" src="assets/images/background_clean.jpg">
+      <img id="reference-full" src="assets/images/reference_full.jpg">
+      <img id="character-img" src="assets/images/character.png">
+      <img id="sigil-custom-img" src="assets/images/sigil_custom.png">
+          <a-asset-item id="arcade-glb" src="assets/models/arcade.glb"></a-asset-item>
+          <img id="floor-led-pattern-img" src="assets/images/floor_led_pattern.png">
+    </a-assets>
+
+    <!-- PLAYER: average standing viewer, eye height around 1.6m -->
+    <a-entity
+      id="player"
+      position="0 1.6 1.25"
+      clamp-player="minX: -1.65; maxX: 1.65; minZ: -1.35; maxZ: 1.25"
+    >
+      <a-entity
+        camera
+        look-controls="touchEnabled: true; mouseEnabled: true"
+        wasd-controls="acceleration: 26; fly: false"
+      ></a-entity>
+    </a-entity>
+
+    <!-- DARK SKY: do not put the painting here later; this remains abstract/cosmic -->
+    <a-sky color="#010004"></a-sky>
+
+    <!-- MINIMAL LIGHTING: most glow is faked with flat/emissive-looking materials -->
+    <a-entity light="type: ambient; color: #2a0b1a; intensity: 0.7"></a-entity>
+    <a-entity light="type: point; color: #ff0038; intensity: 1.25; distance: 5.8" position="1.78 2.25 -3.45"></a-entity>
+    <a-entity light="type: point; color: #3388ff; intensity: 0.58; distance: 3.8" position="-1.48 1.55 -2.45"></a-entity>
+
+    <!-- FLOOR / STAGE -->
+    <a-plane
+      id="stage-floor"
+      position="0 0 -1.15"
+      rotation="-90 0 0"
+      width="4.25"
+      height="4.25"
+      material="color: #070512; roughness: 0.78; metalness: 0.04"
+    ></a-plane>
+
+    <!-- FOREGROUND TABLE/FLOOR ZONE: this approximates the source image's neon surface -->
+    <a-plane
+      id="foreground-surface"
+      position="-0.7 0.018 -0.72"
+      rotation="-90 0 0"
+      width="3.05"
+      height="1.55"
+      material="shader: flat; color: #10103a; opacity: 0.72; transparent: true"
+    ></a-plane>
+
+    <!-- BACKDROP: big flat plane now; later this receives background_clean.jpg -->
+    <a-image
+      id="reference-backplate"
+      src="#background-clean"
+      position="0 2.12 -4.55"
+      width="4.8"
+      height="4.8"
+      material="shader: flat; transparent: true; opacity: 0.45; side: double"
+    ></a-image>
+
+    <a-gltf-model
+      id="arcade-model"
+      src="#arcade-glb"
+      position="-1.25 0 -2.28"
+      rotation="0 10 0"
+      scale="1.55 1.55 1.55"
+    ></a-gltf-model>
+
+    <a-entity
+      id="custom-neon-sigil"
+      position="1.78 2.30 -3.20"
+      rotation="0 -8 0"
+      animation__spin="property: rotation; from: 0 -8 0; to: 0 352 0; loop: true; dur: 26000; easing: linear"
+      animation__pulse="property: scale; from: 1 1 1; to: 1.05 1.05 1.05; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+    >
+      <!-- glow layer -->
+      <a-image
+        id="custom-neon-sigil-glow"
+        src="#sigil-custom-img"
+        position="0 0 0"
+        width="2.25"
+        height="2.25"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.22; side: double"
+      ></a-image>
+
+      <!-- crisp main layer -->
+      <a-image
+        id="custom-neon-sigil-core"
+        src="#sigil-custom-img"
+        position="0 0 0.01"
+        width="1.95"
+        height="1.95"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double"
+      ></a-image>
+    </a-entity>
+
+    <a-image
+      id="character-cutout"
+      src="#character-img"
+      position="0.38 1.42 -2.08"
+      rotation="0 -3 0"
+      width="1.48"
+      height="2.96"
+      material="shader: flat; transparent: true; alphaTest: 0.01; side: double"
+    ></a-image>
+
+    <!-- WRAP PANELS: theatrical set walls, not a literal room -->
+    <a-plane
+      id="backdrop-left"
+      position="-3.68 2.05 -3.05"
+      rotation="0 34 0"
+      width="3.4"
+      height="4.5"
+      material="shader: flat; color: #03040d; opacity: 1"
+    ></a-plane>
+
+    <a-plane
+      id="backdrop-right"
+      position="3.72 2.05 -3.05"
+      rotation="0 -34 0"
+      width="3.4"
+      height="4.5"
+      material="shader: flat; color: #03040d; opacity: 1"
+    ></a-plane>
+
+    <!-- STARFIELD / RED MOTES -->
+    <a-entity id="stars">
+      <a-sphere position="-3.0 3.1 -4.08" radius="0.014" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-2.45 2.48 -3.7" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="-2.05 3.28 -4.18" radius="0.014" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-1.52 2.83 -3.92" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="-1.04 3.36 -4.05" radius="0.016" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-0.5 2.62 -3.85" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="0.05 3.13 -4.1" radius="0.011" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="0.62 2.72 -3.75" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="1.18 3.26 -4.08" radius="0.017" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="1.73 2.58 -3.72" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="2.32 3.12 -4.07" radius="0.015" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="2.82 2.55 -3.78" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="3.08 3.32 -4.2" radius="0.013" color="#ff2944" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- ARCADE CABINET: more like v1, slightly uncanny, left-side anchor -->
+    <a-entity id="arcade" visible="false" position="-1.35 0 -2.42" rotation="0 7 -2">
+      <!-- lower body -->
+      <a-box
+        position="0 0.84 0"
+        width="0.86"
+        height="1.68"
+        depth="0.58"
+        color="#020205"
+        material="roughness: 0.34; metalness: 0.38"
+      ></a-box>
+
+      <!-- upper body / monitor shell -->
+      <a-box
+        position="0 1.55 0.02"
+        width="1.02"
+        height="0.96"
+        depth="0.62"
+        color="#030306"
+        material="roughness: 0.34; metalness: 0.42"
+      ></a-box>
+
+      <!-- marquee -->
+      <a-box
+        position="0 2.18 0.03"
+        width="1.14"
+        height="0.34"
+        depth="0.66"
+        color="#05050a"
+        material="roughness: 0.28; metalness: 0.45"
+      ></a-box>
+
+      <a-plane
+        position="0 2.19 0.366"
+        width="0.95"
+        height="0.2"
+        material="shader: flat; color: #ff5a2d; opacity: 0.8; transparent: true"
+      ></a-plane>
+
+      <!-- red side trim / silhouette -->
+      <a-box position="-0.55 1.22 0.035" width="0.04" height="2.22" depth="0.68" color="#ff0038" material="shader: flat"></a-box>
+      <a-box position="0.55 1.22 0.035" width="0.04" height="2.22" depth="0.68" color="#ff0038" material="shader: flat"></a-box>
+      <a-box position="0 2.37 0.035" width="1.08" height="0.04" depth="0.68" color="#ff0038" material="shader: flat"></a-box>
+
+      <!-- screen bezel -->
+      <a-box
+        position="0 1.55 0.34"
+        width="0.82"
+        height="0.64"
+        depth="0.045"
+        color="#050509"
+      ></a-box>
+
+      <!-- screen -->
+      <a-plane
+        position="0 1.55 0.368"
+        width="0.68"
+        height="0.49"
+        material="shader: flat; color: #519bff; opacity: 0.96"
+        animation="property: material.opacity; dir: alternate; dur: 1900; easing: easeInOutSine; loop: true; to: 0.72"
+      ></a-plane>
+
+      <a-text
+        value="GEIST"
+        position="-0.19 1.55 0.377"
+        scale="0.26 0.26 0.26"
+        color="#ffffff"
+        align="center"
+      ></a-text>
+
+      <!-- control deck -->
+      <a-box
+        position="0 0.94 0.38"
+        rotation="-17 0 0"
+        width="0.88"
+        height="0.13"
+        depth="0.44"
+        color="#090912"
+      ></a-box>
+
+      <!-- buttons and joystick -->
+      <a-cylinder position="-0.16 1.03 0.58" rotation="90 0 0" radius="0.052" height="0.028" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-cylinder position="0.04 1.03 0.58" rotation="90 0 0" radius="0.052" height="0.028" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-cylinder position="0.24 1.03 0.55" rotation="90 0 0" radius="0.048" height="0.028" color="#191922"></a-cylinder>
+
+      <a-cylinder position="-0.34 1.08 0.53" radius="0.018" height="0.18" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-sphere position="-0.34 1.2 0.53" radius="0.06" color="#ff0038" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- CHARACTER PLACEHOLDER: human-scale marker, deliberately subdued until PNG replacement -->
+    <!-- character-placeholder hidden during reference calibration -->
+<!-- BACK SIGIL: larger, more dominant, behind/right of figure -->
+    <!-- back-sigil placeholder hidden during reference calibration -->
+<a-entity line="start: 0.68 -0.39 0.02; end: 0 0.76 0.02; color: #ff0038"></a-entity>
+      <a-entity line="start: 0 0.76 0.02; end: -0.68 -0.39 0.02; color: #ff0038"></a-entity>
+
+      <a-entity line="start: -0.48 0.36 0.025; end: 0.48 0.36 0.025; color: #ff0038"></a-entity>
+      <a-entity line="start: 0.48 0.36 0.025; end: 0 -0.62 0.025; color: #ff0038"></a-entity>
+      <a-entity line="start: 0 -0.62 0.025; end: -0.48 0.36 0.025; color: #ff0038"></a-entity>
+
+      <!-- small drop node -->
+      <a-cylinder position="0 -1.03 0.04" radius="0.012" height="0.36" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-sphere position="0 -1.22 0.04" radius="0.045" color="#ff0038" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- FLOOR SIGIL: foreground anchor -->
+    <a-entity id="floor-sigil" position="-0.98 0.04 -0.72" rotation="-90 0 -8">
+      <a-circle
+        radius="0.62"
+        material="shader: flat; color: #ff0038; opacity: 0.06; transparent: true; side: double"
+        pulse-opacity="min: 0.025; max: 0.11; speed: 0.0022"
+      ></a-circle>
+
+      <a-ring
+        radius-inner="0.48"
+        radius-outer="0.52"
+        material="shader: flat; color: #ff0038; opacity: 0.75; transparent: true; side: double"
+        pulse-opacity="min: 0.32; max: 0.84; speed: 0.0028"
+      ></a-ring>
+    </a-entity>
+
+    <!-- RIGHT-SIDE HANGING LIGHT STRANDS -->
+    <!-- hanging-lights placeholder hidden during reference calibration -->
+<!-- WALKABLE BOUNDARY: visible for development, later make invisible -->
+    <a-box position="0 0.035 1.25" width="4.2" height="0.05" depth="0.04" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="-2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="0 0.035 -2.35" width="4.2" height="0.05" depth="0.04" material="shader: flat; color: #450016; opacity: 0.18; transparent: true"></a-box>
+  <a-entity id="led-floor-group">
+      <!-- main tiled LED pattern -->
+      <a-plane
+        id="led-floor-pattern"
+        position="0 0.021 -1.30"
+        rotation="-90 0 0"
+        width="4.2"
+        height="4.2"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.92; side: double"
+      ></a-plane>
+
+      <!-- soft fake glow pass -->
+      <a-plane
+        id="led-floor-glow"
+        position="0 0.018 -1.30"
+        rotation="-90 0 0"
+        width="4.35"
+        height="4.35"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.18; side: double"
+        animation__pulse="property: material.opacity; from: 0.10; to: 0.24; dir: alternate; dur: 1800; easing: easeInOutSine; loop: true"
+      ></a-plane>
+    </a-entity>
+
+    <!-- FLOOR HOLOGRAM SCREEN / RECESSED WELL -->
+    <a-entity id="ritual-shape-display" position="-1.02 0 -0.82">
+
+      <!-- dark recessed screen well under the existing floor ring -->
+      <a-cylinder
+        position="0 -0.035 0"
+        radius="0.44"
+        height="0.075"
+        rotation="90 0 0"
+        color="#080010"
+        material="shader: flat; opacity: 0.96"
+      ></a-cylinder>
+
+      <!-- inner luminous display surface -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.40"
+        color="#160026"
+        material="shader: flat; opacity: 0.92; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- subtle glass cover flush with the floor -->
+      <a-circle
+        position="0 0.024 0"
+        rotation="-90 0 0"
+        radius="0.405"
+        color="#88aaff"
+        material="shader: flat; opacity: 0.09; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- soft internal glow halo -->
+      <a-ring
+        position="0 0.018 0"
+        rotation="-90 0 0"
+        radius-inner="0.16"
+        radius-outer="0.35"
+        material="shader: flat; color: #4a66ff; opacity: 0.16; transparent: true; side: double"
+        animation__pulsehalo="property: material.opacity; from: 0.08; to: 0.22; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- animated geometry contained inside the floor-screen -->
+      <a-entity
+        id="floor-holo-shapes"
+        position="0 -0.01 0"
+        animation__spin="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; dur: 14000; easing: linear"
+      >
+
+        <!-- outer tesseract-style cube frame -->
+        <a-box
+          position="0 0.10 0"
+          width="0.38"
+          height="0.38"
+          depth="0.38"
+          material="wireframe: true; shader: flat; color: #b8c8ff; opacity: 0.34; transparent: true"
+          animation__spin="property: rotation; from: 0 0 0; to: 360 360 0; loop: true; dur: 9000; easing: linear"
+          animation__color="property: material.color; from: #b8c8ff; to: #ff44cc; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine"
+        ></a-box>
+
+        <!-- inner cube -->
+        <a-box
+          position="0 0.10 0"
+          width="0.22"
+          height="0.22"
+          depth="0.22"
+          material="wireframe: true; shader: flat; color: #66aaff; opacity: 0.88; transparent: true"
+          animation__spin="property: rotation; from: 0 0 0; to: -360 360 180; loop: true; dur: 6000; easing: linear"
+          animation__color="property: material.color; from: #66aaff; to: #66ffcc; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
+        ></a-box>
+
+        <!-- tetrahedron -->
+        <a-entity
+          geometry="primitive: tetrahedron; radius: 0.14"
+          position="0 0.10 0"
+          material="wireframe: true; shader: flat; color: #7a5cff; opacity: 0.95; transparent: true"
+          animation__spin="property: rotation; from: 0 0 0; to: 360 -360 360; loop: true; dur: 7000; easing: linear"
+          animation__color="property: material.color; from: #7a5cff; to: #ff3355; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"
+        ></a-entity>
+
+        <!-- small inner tetrahedron -->
+        <a-entity
+          geometry="primitive: tetrahedron; radius: 0.075"
+          position="0 0.10 0"
+          material="wireframe: true; shader: flat; color: #ff66ff; opacity: 0.72; transparent: true"
+          animation__spin="property: rotation; from: 0 0 0; to: -360 360 -360; loop: true; dur: 4500; easing: linear"
+          animation__pulse="property: material.opacity; from: 0.35; to: 0.85; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+        ></a-entity>
+
+      </a-entity>
+    </a-entity>
+
+
+<!-- outer hypercube-ish frame -->
+      <a-box
+        id="outer-cube"
+        position="0 0.18 0"
+        width="0.62"
+        height="0.62"
+        depth="0.62"
+        material="wireframe: true; color: #ff3366; emissive: #ff3366; emissiveIntensity: 0.55; opacity: 0.52; transparent: true"
+        animation__spin2="property: rotation; from: 0 0 0; to: 0 360 360; loop: true; dur: 14000; easing: linear"
+        animation__color2="property: material.color; dir: alternate; from: #ff3366; to: #66ffcc; loop: true; dur: 2600; easing: easeInOutSine"
+        animation__emissive2="property: material.emissive; dir: alternate; from: #ff3366; to: #66ffcc; loop: true; dur: 2600; easing: easeInOutSine"
+      ></a-box>
+
+      <!-- inner hypercube-ish frame -->
+      <a-box
+        id="inner-cube"
+        position="0 0.18 0"
+        width="0.34"
+        height="0.34"
+        depth="0.34"
+        material="wireframe: true; color: #4466ff; emissive: #4466ff; emissiveIntensity: 0.7; opacity: 0.7; transparent: true"
+        animation__spin3="property: rotation; from: 0 0 0; to: -360 180 -360; loop: true; dur: 7000; easing: linear"
+        animation__color3="property: material.color; dir: alternate; from: #4466ff; to: #ff33cc; loop: true; dur: 1700; easing: easeInOutSine"
+        animation__emissive3="property: material.emissive; dir: alternate; from: #4466ff; to: #ff33cc; loop: true; dur: 1700; easing: easeInOutSine"
+      ></a-box>
+
+      <!-- soft glow halo -->
+      <a-ring
+        id="ritual-halo"
+        position="0 0.03 0"
+        rotation="-90 0 0"
+        radius-inner="0.18"
+        radius-outer="0.26"
+        material="shader: flat; color: #ff3355; opacity: 0.32; transparent: true; side: double"
+        animation__pulsehalo="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine"
+        animation__colorhalo="property: material.color; dir: alternate; from: #ff3355; to: #44ccff; loop: true; dur: 2400; easing: easeInOutSine"
+      ></a-ring>
+    </a-entity>
+
+
+  </a-scene>
+</body>
+</html>

@@ -1817,7 +1817,7 @@
 <audio id="arcade-theme-audio" preload="auto" loop playsinline></audio>
   
   <div id="notice">
-    GEIST Arcade VR Diorama v94 — disciplined circular arcade ritual room.
+    GEIST Arcade VR Diorama v90 — 9-point ritual cabinet constellation.
   </div>
 
   
@@ -1841,9 +1841,6 @@
         });
 
         this.el.addEventListener("click", () => {
-          if (!document.body.classList.contains("scene-entered")) return;
-          if (window.geistTeleportLockedUntil && performance.now() < window.geistTeleportLockedUntil) return;
-
           const player = document.getElementById("player");
           if (!player) return;
 
@@ -1887,8 +1884,8 @@
     <!-- PLAYER: average standing viewer, eye height around 1.6m -->
     <a-entity
       id="player"
-      position="0 1.6 0"
-      clamp-player="minX: -16; maxX: 16; minZ: -16; maxZ: 16"
+      position="0 1.6 3.25"
+      clamp-player="minX: -5.9; maxX: 5.9; minZ: -11.4; maxZ: 3.35"
     >
       <a-entity
         id="player-camera"
@@ -1927,553 +1924,203 @@
     <!-- FLOOR / STAGE -->
     <a-plane
       id="stage-floor"
-      position="0 0 0"
+      position="0 0 -5.45"
       rotation="-90 0 0"
-      width="38"
-      height="38"
-      material="color: #010208; roughness: 0.9; metalness: 0.02"
-     visible="true"></a-plane>
-
-    
-
-
+      width="12.4"
+      height="15.4"
+      material="color: #040511; roughness: 0.84; metalness: 0.03"
+    ></a-plane>
 
     <!-- FOREGROUND TABLE/FLOOR ZONE: this approximates the source image's neon surface -->
     <a-plane
       id="foreground-surface"
-      position="0 0.018 -5.7"
+      position="0 0.018 -5.42"
       rotation="-90 0 0"
-      width="10.8"
-      height="10.8"
-      material="src: #floor-led-pattern-img; shader: flat; repeat: 5 5; opacity: 0.82; transparent: true; color: #ffffff"
-     visible="false"></a-plane>
-    <a-entity id="ritual-dais-v94">
-      <a-circle position="0 0.010 0" rotation="-90 0 0" radius="14.75" material="shader: flat; color: #03040d; transparent: true; opacity: 0.98; side: double"></a-circle>
-      <a-circle position="0 0.018 0" rotation="-90 0 0" radius="13.2" material="src: #floor-led-pattern-img; shader: flat; transparent: true; opacity: 0.76; side: double; repeat: 7 7; color: #ffffff"></a-circle>
-      <a-ring position="0 0.023 0" rotation="-90 0 0" radius-inner="13.35" radius-outer="13.62" material="shader: flat; color: #ff2148; transparent: true; opacity: 0.34; side: double"></a-ring>
-      <a-ring position="0 0.025 0" rotation="-90 0 0" radius-inner="10.35" radius-outer="10.50" material="shader: flat; color: #7a2cff; transparent: true; opacity: 0.13; side: double"></a-ring>
-      <a-ring position="0 0.027 0" rotation="-90 0 0" radius-inner="3.2" radius-outer="3.35" material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.10; side: double"></a-ring>
+      width="9.4"
+      height="9.4"
+      material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; opacity: 0.98; transparent: true; color: #ffffff"
+    ></a-plane>
+    <a-entity id="ritual-floor-v90">
+      <a-entity id="ritual-line-01" line="start: 0 0.065 -5.15; end: 0 0.065 -10.2; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-02" line="start: 0 0.065 -5.15; end: -3.6 0.065 -8.6; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-03" line="start: 0 0.065 -5.15; end: -5.2 0.065 -5.9; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-04" line="start: 0 0.065 -5.15; end: -4.7 0.065 -2.6; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-05" line="start: 0 0.065 -5.15; end: -2.2 0.065 -0.4; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-06" line="start: 0 0.065 -5.15; end: 2.2 0.065 -0.4; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-07" line="start: 0 0.065 -5.15; end: 4.7 0.065 -2.6; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-08" line="start: 0 0.065 -5.15; end: 5.2 0.065 -5.9; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-09" line="start: 0 0.065 -5.15; end: 3.6 0.065 -8.6; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-10" line="start: -3.6 0.07 -8.6; end: 0 0.07 -10.2; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-11" line="start: 0 0.07 -10.2; end: 3.6 0.07 -8.6; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-12" line="start: -3.6 0.07 -8.6; end: -5.2 0.07 -5.9; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-13" line="start: -5.2 0.07 -5.9; end: -4.7 0.07 -2.6; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-14" line="start: -4.7 0.07 -2.6; end: -2.2 0.07 -0.4; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-15" line="start: -2.2 0.07 -0.4; end: 2.2 0.07 -0.4; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-16" line="start: 2.2 0.07 -0.4; end: 4.7 0.07 -2.6; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-17" line="start: 4.7 0.07 -2.6; end: 5.2 0.07 -5.9; color: #ff315f; opacity: 0.58"></a-entity>
+      <a-entity id="ritual-line-18" line="start: 5.2 0.07 -5.9; end: 3.6 0.07 -8.6; color: #ff315f; opacity: 0.58"></a-entity>
+
+      <a-circle
+        id="node-liber-nox"
+        class="clickable teleport-pad"
+        teleport-node="target: 0 1.6 -8.95"
+        position="0 0.052 -10.2"
+        rotation="-90 0 0"
+        radius="0.72"
+        material="shader: flat; color: #ff0038; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-01"
+        class="clickable teleport-pad"
+        teleport-node="target: -3.15 1.6 -7.85"
+        position="-3.6 0.052 -8.6"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-02"
+        class="clickable teleport-pad"
+        teleport-node="target: -4.45 1.6 -5.45"
+        position="-5.2 0.052 -5.9"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-03"
+        class="clickable teleport-pad"
+        teleport-node="target: -3.95 1.6 -2.65"
+        position="-4.7 0.052 -2.6"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #ff315f; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-04"
+        class="clickable teleport-pad"
+        teleport-node="target: -1.75 1.6 -1.05"
+        position="-2.2 0.052 -0.4"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #ff7a18; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-center"
+        class="clickable teleport-pad"
+        teleport-node="target: 0 1.6 -5.15"
+        position="0 0.056 -5.15"
+        rotation="-90 0 0"
+        radius="0.58"
+        material="shader: flat; color: #ffffff; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-05"
+        class="clickable teleport-pad"
+        teleport-node="target: 1.75 1.6 -1.05"
+        position="2.2 0.052 -0.4"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #ff7a18; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-06"
+        class="clickable teleport-pad"
+        teleport-node="target: 3.95 1.6 -2.65"
+        position="4.7 0.052 -2.6"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #ff315f; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-07"
+        class="clickable teleport-pad"
+        teleport-node="target: 4.45 1.6 -5.45"
+        position="5.2 0.052 -5.9"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-cabinet-08"
+        class="clickable teleport-pad"
+        teleport-node="target: 3.15 1.6 -7.85"
+        position="3.6 0.052 -8.6"
+        rotation="-90 0 0"
+        radius="0.48"
+        material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <a-circle
+        id="node-entry"
+        class="clickable teleport-pad"
+        teleport-node="target: 0 1.6 1.65"
+        position="0 0.052 1.65"
+        rotation="-90 0 0"
+        radius="0.45"
+        material="shader: flat; color: #ff0038; transparent: true; opacity: 0.28; side: double"
+        animation__pulse="property: scale; from: 1 1 1; to: 1.10 1.10 1.10; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
     </a-entity>
-    <a-entity id="liber-nox-aura-v94">
-      <a-ring position="0 0.045 -8.75" rotation="-90 0 0" radius-inner="0.95" radius-outer="1.70" material="shader: flat; color: #ff2148; transparent: true; opacity: 0.30; side: double" animation__pulse="property: scale; from: 1 1 1; to: 1.08 1.08 1.08; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"></a-ring>
-      <a-ring position="0 0.047 -8.75" rotation="-90 0 0" radius-inner="0.35" radius-outer="0.62" material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.34; side: double" animation__spin="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 6000; easing: linear"></a-ring>
-    </a-entity>
-    <a-entity id="teleport-markers-v94">
-
-      <a-entity id="marker-center-group">
-        <a-ring
-          id="marker-center"
-          class="clickable teleport-marker"
-          teleport-node="target: 0 1.6 0"
-          position="0.00 0.058 0.00"
-          rotation="-90 0 0"
-          radius-inner="0.42"
-          radius-outer="0.62"
-          material="shader: flat; color: #ffffff; transparent: true; opacity: 0.56; side: double"
-          animation__pulse="property: scale; from: 1 1 1; to: 1.08 1.08 1.08; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
-        ></a-ring>
-
-        <a-circle
-          position="0.00 0.055 0.00"
-          rotation="-90 0 0"
-          radius="0.38"
-          material="shader: flat; color: #120012; transparent: true; opacity: 0.68; side: double"
-        ></a-circle>
-
-        <a-image
-          src="#unicursal-bolt"
-          position="0.00 0.062 0.00"
-          rotation="-90 0 0"
-          width="0.72"
-          height="0.72"
-          material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.68; color: #ff315f; side: double"
-          animation__spin="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 9500; easing: linear"
-        ></a-image>
-
-        <a-ring
-          position="0.00 0.060 0.00"
-          rotation="-90 0 0"
-          radius-inner="0.82"
-          radius-outer="0.90"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-      </a-entity>
-    
-
-      <a-entity id="marker-liber-group">
-        <a-ring
-          id="marker-liber"
-          class="clickable teleport-marker"
-          teleport-node="target: 0 1.6 -7.25"
-          position="0.00 0.058 -7.25"
-          rotation="-90 0 0"
-          radius-inner="0.42"
-          radius-outer="0.62"
-          material="shader: flat; color: #ff2148; transparent: true; opacity: 0.56; side: double"
-          animation__pulse="property: scale; from: 1 1 1; to: 1.08 1.08 1.08; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
-        ></a-ring>
-
-        <a-circle
-          position="0.00 0.055 -7.25"
-          rotation="-90 0 0"
-          radius="0.38"
-          material="shader: flat; color: #120012; transparent: true; opacity: 0.68; side: double"
-        ></a-circle>
-
-        <a-image
-          src="#unicursal-bolt"
-          position="0.00 0.062 -7.25"
-          rotation="-90 0 0"
-          width="0.72"
-          height="0.72"
-          material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.68; color: #ff9a22; side: double"
-          animation__spin="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 9500; easing: linear"
-        ></a-image>
-
-        <a-ring
-          position="0.00 0.060 -7.25"
-          rotation="-90 0 0"
-          radius-inner="0.82"
-          radius-outer="0.90"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-      </a-entity>
-    
-
-      <a-entity id="marker-01-group">
-        <a-ring
-          id="marker-01"
-          class="clickable teleport-marker"
-          teleport-node="target: -4.66 1.6 -5.55"
-          position="-4.66 0.056 -5.55"
-          rotation="-90 0 0"
-          radius-inner="0.38"
-          radius-outer="0.48"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-        
-        <a-circle
-          position="-4.66 0.060 -5.55"
-          rotation="-90 0 0"
-          radius="0.12"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse1="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1320; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-4.90 0.060 -5.37"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.66; side: double"
-          animation__pulse2="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1440; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-4.42 0.060 -5.37"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.66; side: double"
-          animation__pulse3="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1560; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-4.90 0.060 -5.73"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.66; side: double"
-          animation__pulse4="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1680; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-4.42 0.060 -5.73"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.66; side: double"
-          animation__pulse5="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
-        ></a-circle>
-      </a-entity>
-    
-
-      <a-entity id="marker-02-group">
-        <a-ring
-          id="marker-02"
-          class="clickable teleport-marker"
-          teleport-node="target: -7.14 1.6 -1.26"
-          position="-7.14 0.058 -1.26"
-          rotation="-90 0 0"
-          radius-inner="0.42"
-          radius-outer="0.62"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.56; side: double"
-          animation__pulse="property: scale; from: 1 1 1; to: 1.08 1.08 1.08; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
-        ></a-ring>
-
-        <a-circle
-          position="-7.14 0.055 -1.26"
-          rotation="-90 0 0"
-          radius="0.38"
-          material="shader: flat; color: #120012; transparent: true; opacity: 0.68; side: double"
-        ></a-circle>
-
-        <a-image
-          src="#unicursal-bolt"
-          position="-7.14 0.062 -1.26"
-          rotation="-90 0 0"
-          width="0.72"
-          height="0.72"
-          material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.68; color: #8d35ff; side: double"
-          animation__spin="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 9500; easing: linear"
-        ></a-image>
-
-        <a-ring
-          position="-7.14 0.060 -1.26"
-          rotation="-90 0 0"
-          radius-inner="0.82"
-          radius-outer="0.90"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-      </a-entity>
-    
-
-      <a-entity id="marker-03-group">
-        <a-ring
-          id="marker-03"
-          class="clickable teleport-marker"
-          teleport-node="target: -6.28 1.6 3.62"
-          position="-6.28 0.056 3.62"
-          rotation="-90 0 0"
-          radius-inner="0.38"
-          radius-outer="0.48"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-        
-        <a-circle
-          position="-6.28 0.060 3.62"
-          rotation="-90 0 0"
-          radius="0.12"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.66; side: double"
-          animation__pulse1="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1320; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-6.52 0.060 3.80"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse2="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1440; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-6.04 0.060 3.80"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse3="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1560; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-6.52 0.060 3.44"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse4="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1680; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="-6.04 0.060 3.44"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse5="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
-        ></a-circle>
-      </a-entity>
-    
-
-      <a-entity id="marker-04-group">
-        <a-ring
-          id="marker-04"
-          class="clickable teleport-marker"
-          teleport-node="target: -2.48 1.6 6.81"
-          position="-2.48 0.058 6.81"
-          rotation="-90 0 0"
-          radius-inner="0.42"
-          radius-outer="0.62"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.56; side: double"
-          animation__pulse="property: scale; from: 1 1 1; to: 1.08 1.08 1.08; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
-        ></a-ring>
-
-        <a-circle
-          position="-2.48 0.055 6.81"
-          rotation="-90 0 0"
-          radius="0.38"
-          material="shader: flat; color: #120012; transparent: true; opacity: 0.68; side: double"
-        ></a-circle>
-
-        <a-image
-          src="#unicursal-bolt"
-          position="-2.48 0.062 6.81"
-          rotation="-90 0 0"
-          width="0.72"
-          height="0.72"
-          material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.68; color: #ff315f; side: double"
-          animation__spin="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 9500; easing: linear"
-        ></a-image>
-
-        <a-ring
-          position="-2.48 0.060 6.81"
-          rotation="-90 0 0"
-          radius-inner="0.82"
-          radius-outer="0.90"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-      </a-entity>
-    
-
-      <a-entity id="marker-05-group">
-        <a-ring
-          id="marker-05"
-          class="clickable teleport-marker"
-          teleport-node="target: 2.48 1.6 6.81"
-          position="2.48 0.056 6.81"
-          rotation="-90 0 0"
-          radius-inner="0.38"
-          radius-outer="0.48"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-        
-        <a-circle
-          position="2.48 0.060 6.81"
-          rotation="-90 0 0"
-          radius="0.12"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.66; side: double"
-          animation__pulse1="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1320; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="2.24 0.060 6.99"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.66; side: double"
-          animation__pulse2="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1440; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="2.72 0.060 6.99"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.66; side: double"
-          animation__pulse3="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1560; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="2.24 0.060 6.63"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.66; side: double"
-          animation__pulse4="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1680; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="2.72 0.060 6.63"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.66; side: double"
-          animation__pulse5="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
-        ></a-circle>
-      </a-entity>
-    
-
-      <a-entity id="marker-06-group">
-        <a-ring
-          id="marker-06"
-          class="clickable teleport-marker"
-          teleport-node="target: 6.28 1.6 3.62"
-          position="6.28 0.058 3.62"
-          rotation="-90 0 0"
-          radius-inner="0.42"
-          radius-outer="0.62"
-          material="shader: flat; color: #ff315f; transparent: true; opacity: 0.56; side: double"
-          animation__pulse="property: scale; from: 1 1 1; to: 1.08 1.08 1.08; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
-        ></a-ring>
-
-        <a-circle
-          position="6.28 0.055 3.62"
-          rotation="-90 0 0"
-          radius="0.38"
-          material="shader: flat; color: #120012; transparent: true; opacity: 0.68; side: double"
-        ></a-circle>
-
-        <a-image
-          src="#unicursal-bolt"
-          position="6.28 0.062 3.62"
-          rotation="-90 0 0"
-          width="0.72"
-          height="0.72"
-          material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.68; color: #42d7ff; side: double"
-          animation__spin="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 9500; easing: linear"
-        ></a-image>
-
-        <a-ring
-          position="6.28 0.060 3.62"
-          rotation="-90 0 0"
-          radius-inner="0.82"
-          radius-outer="0.90"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-      </a-entity>
-    
-
-      <a-entity id="marker-07-group">
-        <a-ring
-          id="marker-07"
-          class="clickable teleport-marker"
-          teleport-node="target: 7.14 1.6 -1.26"
-          position="7.14 0.056 -1.26"
-          rotation="-90 0 0"
-          radius-inner="0.38"
-          radius-outer="0.48"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-        
-        <a-circle
-          position="7.14 0.060 -1.26"
-          rotation="-90 0 0"
-          radius="0.12"
-          material="shader: flat; color: #42d7ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse1="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1320; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="6.90 0.060 -1.08"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse2="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1440; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="7.38 0.060 -1.08"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse3="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1560; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="6.90 0.060 -1.44"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse4="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1680; easing: easeInOutSine"
-        ></a-circle>
-        <a-circle
-          position="7.38 0.060 -1.44"
-          rotation="-90 0 0"
-          radius="0.09"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.66; side: double"
-          animation__pulse5="property: scale; from: 1 1 1; to: 1.16 1.16 1.16; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
-        ></a-circle>
-      </a-entity>
-    
-
-      <a-entity id="marker-08-group">
-        <a-ring
-          id="marker-08"
-          class="clickable teleport-marker"
-          teleport-node="target: 4.66 1.6 -5.55"
-          position="4.66 0.058 -5.55"
-          rotation="-90 0 0"
-          radius-inner="0.42"
-          radius-outer="0.62"
-          material="shader: flat; color: #8d35ff; transparent: true; opacity: 0.56; side: double"
-          animation__pulse="property: scale; from: 1 1 1; to: 1.08 1.08 1.08; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
-        ></a-ring>
-
-        <a-circle
-          position="4.66 0.055 -5.55"
-          rotation="-90 0 0"
-          radius="0.38"
-          material="shader: flat; color: #120012; transparent: true; opacity: 0.68; side: double"
-        ></a-circle>
-
-        <a-image
-          src="#unicursal-bolt"
-          position="4.66 0.062 -5.55"
-          rotation="-90 0 0"
-          width="0.72"
-          height="0.72"
-          material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.68; color: #ff9a22; side: double"
-          animation__spin="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 9500; easing: linear"
-        ></a-image>
-
-        <a-ring
-          position="4.66 0.060 -5.55"
-          rotation="-90 0 0"
-          radius-inner="0.82"
-          radius-outer="0.90"
-          material="shader: flat; color: #ff9a22; transparent: true; opacity: 0.20; side: double"
-        ></a-ring>
-      </a-entity>
-    
-    </a-entity>
-
-    <a-entity id="lighting-v94">
-      <a-entity light="type: ambient; color: #3c4560; intensity: 0.64"></a-entity>
-
-      <!-- Liber Nox focus -->
-      <a-entity light="type: point; color: #ff315f; intensity: 3.1; distance: 10.5; decay: 1.08" position="0 2.8 -8.8"></a-entity>
-      <a-entity light="type: point; color: #ff9a22; intensity: 2.0; distance: 8.5; decay: 1.10" position="0.6 2.2 -10.2"></a-entity>
-
-      <!-- left/right cabinet readability -->
-      <a-entity light="type: point; color: #8d35ff; intensity: 2.0; distance: 12.0; decay: 1.12" position="-6.5 2.5 -1.2"></a-entity>
-      <a-entity light="type: point; color: #42d7ff; intensity: 2.0; distance: 12.0; decay: 1.12" position="6.5 2.5 -1.2"></a-entity>
-
-      <!-- priestess fill -->
-      <a-entity light="type: point; color: #ffd8cc; intensity: 1.9; distance: 7.0; decay: 1.10" position="2.2 2.1 -8.6"></a-entity>
-    </a-entity>
-
-
-    
-    
-    
-
-    
-
-
-    
-    
-    
-
-    
-
-
-    
-
-    
 
 
     <!-- BACKDROP: big flat plane now; later this receives background_clean.jpg -->
     <a-image
       id="reference-backplate"
       src="#background-clean"
-      position="0 4.0 -18.0"
-      width="18"
-      height="10"
-      material="shader: flat; transparent: true; opacity: 0.07; side: double"
+      position="0 2.45 -11.05"
+      width="8.2"
+      height="5.6"
+      material="shader: flat; transparent: true; opacity: 0.38; side: double"
     ></a-image>
 
     <!-- ARCADE CABINET TEMPLE LAYOUT: four left, four right, Liber Nox as central oracle altar -->
     <a-entity id="cabinet-temple-layout">
       <!-- LEFT ROW: faces inward toward the aisle -->
-      <a-gltf-model id="cabinet-left-01" data-src="assets/models/cabinets/cabinet_01.glb" position="-6.94 0 -8.27" rotation="0 40.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: -6.94 0 -8.27; to: -6.94 0.045 -8.27; dir: alternate; loop: true; dur: 2420; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
-      <a-gltf-model id="cabinet-left-02" data-src="assets/models/cabinets/cabinet_02.glb" position="-10.64 0 -1.88" rotation="0 80.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: -10.64 0 -1.88; to: -10.64 0.045 -1.88; dir: alternate; loop: true; dur: 2540; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
-      <a-gltf-model id="cabinet-left-03" data-src="assets/models/cabinets/cabinet_03.glb" position="-9.35 0 5.40" rotation="0 120.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: -9.35 0 5.40; to: -9.35 0.045 5.40; dir: alternate; loop: true; dur: 2660; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
-      <a-gltf-model id="cabinet-left-04" data-src="assets/models/cabinets/cabinet_04.glb" position="-3.69 0 10.15" rotation="0 160.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: -3.69 0 10.15; to: -3.69 0.045 10.15; dir: alternate; loop: true; dur: 2780; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
+      <a-gltf-model id="cabinet-left-01" data-src="assets/models/cabinets/cabinet_01.glb" position="-3.6 0 -8.6" rotation="0 48 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
+      <a-gltf-model id="cabinet-left-02" data-src="assets/models/cabinets/cabinet_02.glb" position="-5.2 0 -5.9" rotation="0 72 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
+      <a-gltf-model id="cabinet-left-03" data-src="assets/models/cabinets/cabinet_03.glb" position="-4.7 0 -2.6" rotation="0 102 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
+      <a-gltf-model id="cabinet-left-04" data-src="assets/models/cabinets/cabinet_04.glb" position="-2.2 0 -0.4" rotation="0 138 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
 
       <!-- RIGHT ROW: faces inward toward the aisle -->
-      <a-gltf-model id="cabinet-right-01" data-src="assets/models/cabinets/cabinet_05.glb" position="3.69 0 10.15" rotation="0 -160.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: 3.69 0 10.15; to: 3.69 0.045 10.15; dir: alternate; loop: true; dur: 2900; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
-      <a-gltf-model id="cabinet-right-02" data-src="assets/models/cabinets/cabinet_06.glb" position="9.35 0 5.40" rotation="0 -120.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: 9.35 0 5.40; to: 9.35 0.045 5.40; dir: alternate; loop: true; dur: 3020; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
-      <a-gltf-model id="cabinet-right-03" data-src="assets/models/cabinets/cabinet_07.glb" position="10.64 0 -1.88" rotation="0 -80.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: 10.64 0 -1.88; to: 10.64 0.045 -1.88; dir: alternate; loop: true; dur: 3140; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
-      <a-gltf-model id="cabinet-right-04" data-src="assets/models/cabinets/cabinet_08.glb" position="6.94 0 -8.27" rotation="0 -40.00 0" fit-model="height: 1.76" visible="false" animation__float="property: position; from: 6.94 0 -8.27; to: 6.94 0.045 -8.27; dir: alternate; loop: true; dur: 3260; easing: easeInOutSine" scale="1 1 1"></a-gltf-model>
+      <a-gltf-model id="cabinet-right-01" data-src="assets/models/cabinets/cabinet_05.glb" position="2.2 0 -0.4" rotation="0 -138 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
+      <a-gltf-model id="cabinet-right-02" data-src="assets/models/cabinets/cabinet_06.glb" position="4.7 0 -2.6" rotation="0 -102 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
+      <a-gltf-model id="cabinet-right-03" data-src="assets/models/cabinets/cabinet_07.glb" position="5.2 0 -5.9" rotation="0 -72 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
+      <a-gltf-model id="cabinet-right-04" data-src="assets/models/cabinets/cabinet_08.glb" position="3.6 0 -8.6" rotation="0 -48 0" fit-model="height: 1.72" visible="false"></a-gltf-model>
 
       <!-- LIBER NOX: central future oracle / future Liber 333 portal hook -->
       <a-entity
         id="liber-nox-oracle-shrine"
-        position="0 0 -11.4"
-        animation__float="property: position; from: 0 0 -11.4; to: 0 0.055 -11.4; dir: alternate; loop: true; dur: 2600; easing: easeInOutSine"
-       visible="true">
+        position="0 0 -10.2"
+        animation__float="property: position; from: 0 0 -10.2; to: 0 0.045 -10.2; dir: alternate; loop: true; dur: 2600; easing: easeInOutSine"
+      >
         <a-gltf-model
           id="liber-nox-oracle-cabinet"
           src="#liber-nox-glb"
           position="0 0 0"
           rotation="0 0 0"
-          fit-model="height: 2.35"
+          fit-model="height: 2.05"
           data-oracle-url="https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/"
-         visible="true" scale="1 1 1"></a-gltf-model>
+         visible="true"></a-gltf-model>
 
         <!-- Future hook: openLiber333Oracle() should activate this central cabinet as a Liber 333 oracle terminal. -->
         <a-entity light="type: point; color: #ff0038; intensity: 3.0; distance: 6.2; decay: 1.35" position="0 1.65 0.25"></a-entity>
@@ -2500,7 +2147,16 @@
           animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 9000; easing: linear"
         ></a-ring>
 
-        
+        <a-text
+          id="liber-nox-oracle-label"
+          value="LIBER NOX // LIBER 333 ORACLE"
+          position="0 2.85 0.05"
+          rotation="0 0 0"
+          align="center"
+          width="4.6"
+          color="#ffb3c7"
+          material="shader: flat; transparent: true; opacity: 0.92"
+        ></a-text>
       </a-entity>
     </a-entity>
 
@@ -2552,15 +2208,15 @@
     <a-gltf-model
       id="character-model"
       src="#character-glb"
-      position="1.95 0 -9.85"
-      rotation="0 -14 0"
-      scale="1 1 1"
-     visible="true" fit-model="height: 1.72"></a-gltf-model>
+      position="1.45 0 -9.55"
+      rotation="0 -24 0"
+      scale="1.28 1.28 1.28"
+     visible="true"></a-gltf-model>
 
     <a-image
       id="character-cutout" visible="false"
       src="#character-img"
-      position="1.55 1.38 -9.9"
+      position="1.45 1.38 -9.55"
       rotation="0 -24 0"
       width="1.48"
       height="2.96"
@@ -4310,146 +3966,6 @@ if (window.AFRAME && !AFRAME.components["occult-arcade-screen"]) {
 
 
 
-
-
-<script id="teleport-entry-lock-v93">
-(function () {
-  function attachTeleportLock() {
-    const btn = document.getElementById("audio-start");
-    if (!btn || btn.dataset.teleportLockAttached) return;
-
-    btn.dataset.teleportLockAttached = "true";
-    btn.addEventListener("click", () => {
-      window.geistTeleportLockedUntil = performance.now() + 1800;
-    }, true);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", attachTeleportLock);
-  } else {
-    attachTeleportLock();
-  }
-})();
-</script>
-
-
-<script id="model-scale-safety-v93">
-(function () {
-  const modelIds = [
-    "liber-nox-oracle-cabinet",
-    "character-model",
-    "cabinet-left-01",
-    "cabinet-left-02",
-    "cabinet-left-03",
-    "cabinet-left-04",
-    "cabinet-right-01",
-    "cabinet-right-02",
-    "cabinet-right-03",
-    "cabinet-right-04"
-  ];
-
-  function refit(el) {
-    if (!el) return;
-
-    el.setAttribute("scale", "1 1 1");
-
-    if (el.components && el.components["fit-model"] && typeof el.components["fit-model"].fit === "function") {
-      setTimeout(() => el.components["fit-model"].fit(), 80);
-      setTimeout(() => el.components["fit-model"].fit(), 700);
-      setTimeout(() => el.components["fit-model"].fit(), 1600);
-    }
-  }
-
-  function attach() {
-    modelIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el || el.dataset.scaleSafetyV93) return;
-
-      el.dataset.scaleSafetyV93 = "true";
-      refit(el);
-      el.addEventListener("model-loaded", () => refit(el));
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", attach);
-  } else {
-    attach();
-  }
-
-  window.refitArcadeRingV93 = attach;
-})();
-</script>
-
-
-<script id="teleport-entry-lock-v94">
-(function () {
-  function attachTeleportLock() {
-    const btn = document.getElementById("audio-start");
-    if (!btn || btn.dataset.teleportLockAttachedV94) return;
-
-    btn.dataset.teleportLockAttachedV94 = "true";
-    btn.addEventListener("click", () => {
-      window.geistTeleportLockedUntil = performance.now() + 1800;
-    }, true);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", attachTeleportLock);
-  } else {
-    attachTeleportLock();
-  }
-})();
-</script>
-
-
-<script id="model-scale-safety-v94">
-(function () {
-  const modelIds = [
-    "liber-nox-oracle-cabinet",
-    "character-model",
-    "cabinet-left-01",
-    "cabinet-left-02",
-    "cabinet-left-03",
-    "cabinet-left-04",
-    "cabinet-right-01",
-    "cabinet-right-02",
-    "cabinet-right-03",
-    "cabinet-right-04"
-  ];
-
-  function refit(el) {
-    if (!el) return;
-
-    el.setAttribute("scale", "1 1 1");
-
-    if (el.components && el.components["fit-model"] && typeof el.components["fit-model"].fit === "function") {
-      setTimeout(() => el.components["fit-model"].fit(), 80);
-      setTimeout(() => el.components["fit-model"].fit(), 700);
-      setTimeout(() => el.components["fit-model"].fit(), 1600);
-    }
-  }
-
-  function attach() {
-    modelIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el || el.dataset.scaleSafetyV94) return;
-
-      el.dataset.scaleSafetyV94 = "true";
-      refit(el);
-      el.addEventListener("model-loaded", () => refit(el));
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", attach);
-  } else {
-    attach();
-  }
-
-  window.refitArcadeRingV94 = attach;
-})();
-</script>
 
 </body>
 </html>
