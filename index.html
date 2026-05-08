@@ -5,13 +5,12 @@
   <title>GEIST Arcade | Liber 333 Oracle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+
   <style>
     :root {
       color-scheme: dark;
       --red: #ff0038;
-      --red-soft: rgba(255, 0, 56, 0.42);
       --cyan: #65dfff;
-      --gold: #ffcc88;
       --void: #020004;
     }
 
@@ -70,8 +69,7 @@
       padding: 28px 22px 24px;
       border: 1px solid rgba(255, 35, 92, 0.52);
       border-radius: 22px;
-      background:
-        linear-gradient(180deg, rgba(28, 0, 18, 0.94), rgba(6, 0, 8, 0.97));
+      background: linear-gradient(180deg, rgba(28, 0, 18, 0.94), rgba(6, 0, 8, 0.97));
       box-shadow:
         0 0 28px rgba(255, 0, 62, 0.18),
         0 0 88px rgba(100, 0, 180, 0.12),
@@ -155,8 +153,7 @@
       min-height: 64px;
       border: 1px solid rgba(255, 0, 64, 0.42);
       border-radius: 16px;
-      background:
-        linear-gradient(180deg, rgba(34, 0, 18, 0.98), rgba(7, 0, 8, 0.98));
+      background: linear-gradient(180deg, rgba(34, 0, 18, 0.98), rgba(7, 0, 8, 0.98));
       color: rgba(255, 220, 230, 0.68);
       font-size: 15px;
       font-weight: 900;
@@ -212,6 +209,7 @@
 
   <script>
     const ORACLE_URL = 'https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/';
+    let TEMPLE_ENTERED = false;
 
     AFRAME.registerComponent('fit-model', {
       schema: {
@@ -227,27 +225,52 @@
           const mesh = this.el.getObject3D('mesh');
           if (!mesh) return;
 
-          const box = new THREE.Box3().setFromObject(mesh);
-          const size = new THREE.Vector3();
-          box.getSize(size);
-          if (!Number.isFinite(size.y) || size.y <= 0) return;
+          const object = this.el.object3D;
+          const parent = object.parent;
+          object.updateMatrixWorld(true);
 
-          const scaleFactor = this.data.height / size.y;
-          this.el.object3D.scale.multiplyScalar(scaleFactor);
-          this.el.object3D.updateMatrixWorld(true);
+          const targetWorld = new THREE.Vector3();
+          object.getWorldPosition(targetWorld);
+
+          const initialBox = new THREE.Box3().setFromObject(mesh);
+          const initialSize = new THREE.Vector3();
+          initialBox.getSize(initialSize);
+          if (!Number.isFinite(initialSize.y) || initialSize.y <= 0) return;
+
+          const scaleFactor = this.data.height / initialSize.y;
+          object.scale.multiplyScalar(scaleFactor);
+          object.updateMatrixWorld(true);
 
           const fittedBox = new THREE.Box3().setFromObject(mesh);
-          const center = new THREE.Vector3();
-          fittedBox.getCenter(center);
+          const fittedCenter = new THREE.Vector3();
+          fittedBox.getCenter(fittedCenter);
 
+          const desiredWorld = targetWorld.clone();
           if (this.data.center) {
-            this.el.object3D.position.x -= center.x;
-            this.el.object3D.position.z -= center.z;
+            desiredWorld.x += targetWorld.x - fittedCenter.x;
+            desiredWorld.z += targetWorld.z - fittedCenter.z;
           }
           if (this.data.floor) {
-            this.el.object3D.position.y -= fittedBox.min.y;
+            desiredWorld.y += targetWorld.y - fittedBox.min.y;
+          }
+
+          if (parent) {
+            const currentLocal = parent.worldToLocal(targetWorld.clone());
+            const desiredLocal = parent.worldToLocal(desiredWorld.clone());
+            object.position.add(desiredLocal.sub(currentLocal));
+          } else {
+            object.position.add(desiredWorld.sub(targetWorld));
           }
         }, 0);
+      }
+    });
+
+    AFRAME.registerComponent('hide-on-model-ready', {
+      schema: { target: { type: 'selector' } },
+      init: function () {
+        this.el.addEventListener('model-loaded', () => {
+          if (this.data.target) this.data.target.setAttribute('visible', 'false');
+        });
       }
     });
 
@@ -258,18 +281,18 @@
       },
       init: function () {
         const open = () => {
+          if (!TEMPLE_ENTERED) return;
           showToast(this.data.label);
           window.open(this.data.url || ORACLE_URL, '_blank', 'noopener,noreferrer');
         };
 
         this.el.addEventListener('click', open);
         this.el.addEventListener('mouseenter', () => {
+          if (!TEMPLE_ENTERED) return;
           this.el.emit('oracle-hover-on');
-          showToast('Select Liber 333 to open the oracle');
+          showToast('Tap Liber 333 to open the oracle');
         });
-        this.el.addEventListener('mouseleave', () => {
-          this.el.emit('oracle-hover-off');
-        });
+        this.el.addEventListener('mouseleave', () => this.el.emit('oracle-hover-off'));
       }
     });
 
@@ -335,8 +358,10 @@
 
       button?.addEventListener('click', () => {
         if (!ready) return;
+        TEMPLE_ENTERED = true;
         overlay?.classList.add('hidden');
         window.setTimeout(() => overlay?.remove(), 520);
+        showToast('Temple entered. Tap the Liber 333 cabinet when ready.');
       });
     });
   </script>
@@ -354,7 +379,7 @@
     </section>
   </div>
 
-  <div id="oracle-toast">Select Liber 333 to open the oracle</div>
+  <div id="oracle-toast">Tap Liber 333 to open the oracle</div>
 
   <a-scene
     renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false"
@@ -367,7 +392,6 @@
       <img id="floor-pattern" src="assets/images/floor_led_pattern.png" crossorigin="anonymous" />
       <img id="backdrop-img" src="assets/images/newarcadebackdrop.jpg" crossorigin="anonymous" />
       <img id="sigil-marker" src="assets/images/unicursal_bolt_red_alpha.png" crossorigin="anonymous" />
-      <img id="sigil-custom" src="assets/images/sigil_custom.png" crossorigin="anonymous" />
 
       <a-asset-item id="model-priestess" src="assets/models/character.glb"></a-asset-item>
       <a-asset-item id="model-liber-333" src="assets/models/cabinets/liber_nox.glb"></a-asset-item>
@@ -378,41 +402,17 @@
     <a-sky color="#020004"></a-sky>
 
     <a-entity id="lighting">
-      <a-entity light="type: ambient; color: #3b1525; intensity: 0.85"></a-entity>
+      <a-entity light="type: ambient; color: #3b1525; intensity: 1.05"></a-entity>
       <a-entity light="type: hemisphere; color: #4d1830; groundColor: #050006; intensity: 0.55"></a-entity>
-      <a-entity light="type: point; color: #ff174f; intensity: 2.1; distance: 9; decay: 1.35" position="0 2.6 -3.25"></a-entity>
-      <a-entity light="type: point; color: #6bdcff; intensity: 0.85; distance: 8; decay: 1.5" position="-3.6 2.1 -1.5"></a-entity>
-      <a-entity light="type: point; color: #ffb36b; intensity: 1.0; distance: 7; decay: 1.4" position="3.2 2.0 -2.2"></a-entity>
+      <a-entity light="type: point; color: #ff174f; intensity: 2.35; distance: 9; decay: 1.25" position="0 2.7 -3.25"></a-entity>
+      <a-entity light="type: point; color: #6bdcff; intensity: 0.95; distance: 8; decay: 1.4" position="-3.6 2.1 -1.5"></a-entity>
+      <a-entity light="type: point; color: #ffb36b; intensity: 1.1; distance: 7; decay: 1.4" position="3.2 2.0 -2.2"></a-entity>
     </a-entity>
 
     <a-entity id="environment">
-      <a-plane
-        id="dark-base-floor"
-        position="0 -0.012 0"
-        rotation="-90 0 0"
-        width="18"
-        height="18"
-        material="color: #050006; roughness: 0.92; metalness: 0.02"
-      ></a-plane>
-
-      <a-circle
-        id="ritual-pattern-floor"
-        position="0 0.004 0"
-        rotation="-90 0 0"
-        radius="7.3"
-        segments="96"
-        material="src: #floor-pattern; repeat: 5 5; shader: flat; transparent: true; opacity: 0.86; side: double"
-      ></a-circle>
-
-      <a-ring
-        id="outer-floor-boundary"
-        position="0 0.012 0"
-        rotation="-90 0 0"
-        radius-inner="7.25"
-        radius-outer="7.34"
-        segments-theta="128"
-        material="shader: flat; color: #ff0038; transparent: true; opacity: 0.32; side: double"
-      ></a-ring>
+      <a-plane id="dark-base-floor" position="0 -0.012 0" rotation="-90 0 0" width="18" height="18" material="color: #050006; roughness: 0.92; metalness: 0.02"></a-plane>
+      <a-circle id="ritual-pattern-floor" position="0 0.004 0" rotation="-90 0 0" radius="7.3" segments="96" material="src: #floor-pattern; repeat: 5 5; shader: flat; transparent: true; opacity: 0.86; side: double"></a-circle>
+      <a-ring id="outer-floor-boundary" position="0 0.012 0" rotation="-90 0 0" radius-inner="7.25" radius-outer="7.34" segments-theta="128" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.32; side: double"></a-ring>
 
       <a-entity id="backdrop-panels">
         <a-image src="#backdrop-img" position="-5.35 2.3 -3.75" rotation="0 55 0" width="4.2" height="4.3" material="shader: flat; transparent: true; opacity: 0.19; side: double"></a-image>
@@ -426,97 +426,57 @@
     </a-entity>
 
     <a-entity id="arcade-room-layout">
-      <a-entity id="liber-333-anchor" position="0 0 -4.15" rotation="0 0 0">
-        <a-gltf-model
-          id="liber-333-cabinet"
-          src="#model-liber-333"
-          fit-model="height: 2.12; center: true; floor: true"
-        ></a-gltf-model>
-
-        <a-entity id="oracle-attract-screen" position="0 1.36 0.58" rotation="0 0 0" slow-float="amount: 0.018; speed: 0.0017">
-          <a-plane width="1.12" height="0.62" material="shader: flat; color: #09000b; transparent: true; opacity: 0.88"></a-plane>
-          <a-plane position="0 0 0.006" width="1.02" height="0.52" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.09" animation="property: material.opacity; from: 0.06; to: 0.16; dur: 1500; dir: alternate; loop: true; easing: easeInOutSine"></a-plane>
-          <a-text value="LIBER 333" position="0 0.12 0.012" align="center" color="#ffe6ed" width="2.6" material="shader: flat"></a-text>
-          <a-text value="ASK THE ORACLE" position="0 -0.08 0.012" align="center" color="#ff5d86" width="2.1" material="shader: flat"></a-text>
-        </a-entity>
+      <a-entity id="liber-333-proxy" position="0 0 -4.15">
+        <a-box position="0 1.05 0" width="1.35" height="2.1" depth="0.72" material="color: #090009; metalness: 0.35; roughness: 0.55"></a-box>
+        <a-box position="0 2.18 0.03" width="1.55" height="0.32" depth="0.78" material="shader: flat; color: #17000b"></a-box>
+        <a-plane position="0 1.42 0.37" width="1.02" height="0.58" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.16"></a-plane>
+        <a-text value="LIBER 333" position="0 1.45 0.385" align="center" color="#ffe6ed" width="2.8" material="shader: flat"></a-text>
       </a-entity>
 
-      <a-box
-        id="liber-333-hitbox"
-        class="clickable"
-        position="0 1.18 -3.74"
-        width="2.25"
-        height="2.35"
-        depth="0.82"
-        material="color: #ff0038; transparent: true; opacity: 0.001; depthWrite: false"
-        oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle"
-        animation__hoveron="property: scale; startEvents: oracle-hover-on; to: 1.018 1.018 1.018; dur: 120; easing: easeOutQuad"
-        animation__hoveroff="property: scale; startEvents: oracle-hover-off; to: 1 1 1; dur: 180; easing: easeOutQuad"
-      ></a-box>
+      <a-gltf-model id="liber-333-cabinet" src="#model-liber-333" position="0 0 -4.15" rotation="0 0 0" fit-model="height: 2.12; center: true; floor: true" hide-on-model-ready="target: #liber-333-proxy"></a-gltf-model>
+
+      <a-entity id="oracle-attract-screen" position="0 1.36 -3.57" rotation="0 0 0" slow-float="amount: 0.018; speed: 0.0017">
+        <a-plane width="1.12" height="0.62" material="shader: flat; color: #09000b; transparent: true; opacity: 0.88"></a-plane>
+        <a-plane position="0 0 0.006" width="1.02" height="0.52" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.09" animation="property: material.opacity; from: 0.06; to: 0.16; dur: 1500; dir: alternate; loop: true; easing: easeInOutSine"></a-plane>
+        <a-text value="LIBER 333" position="0 0.12 0.012" align="center" color="#ffe6ed" width="2.6" material="shader: flat"></a-text>
+        <a-text value="TAP TO OPEN" position="0 -0.08 0.012" align="center" color="#ff5d86" width="2.1" material="shader: flat"></a-text>
+      </a-entity>
+
+      <a-box id="liber-333-hitbox" class="clickable" position="0 1.18 -3.74" width="2.25" height="2.35" depth="0.82" material="color: #ff0038; transparent: true; opacity: 0.001; depthWrite: false" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle" animation__hoveron="property: scale; startEvents: oracle-hover-on; to: 1.018 1.018 1.018; dur: 120; easing: easeOutQuad" animation__hoveroff="property: scale; startEvents: oracle-hover-off; to: 1 1 1; dur: 180; easing: easeOutQuad"></a-box>
 
       <a-entity id="liber-333-floor-marker" position="0 0.034 -2.95" class="clickable" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle">
         <a-circle rotation="-90 0 0" radius="0.72" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.055; side: double" animation="property: material.opacity; from: 0.035; to: 0.09; dur: 1200; dir: alternate; loop: true; easing: easeInOutSine"></a-circle>
         <a-image src="#sigil-marker" position="0 0.006 0" rotation="-90 0 0" width="0.92" height="0.92" material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double" animation="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 18000; easing: linear"></a-image>
       </a-entity>
 
-      <a-gltf-model
-        id="priestess-figure"
-        src="#model-priestess"
-        position="0.92 0 -3.42"
-        rotation="0 -24 0"
-        fit-model="height: 1.72; center: true; floor: true"
-      ></a-gltf-model>
+      <a-entity id="priestess-proxy" position="0.92 0 -3.42" rotation="0 -24 0">
+        <a-cylinder position="0 0.85 0" radius="0.18" height="1.55" material="color: #190010; transparent: true; opacity: 0.72"></a-cylinder>
+        <a-sphere position="0 1.68 0" radius="0.18" material="color: #ffb3c8; transparent: true; opacity: 0.72"></a-sphere>
+        <a-ring position="0 1.78 0.01" radius-inner="0.24" radius-outer="0.28" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.64"></a-ring>
+      </a-entity>
 
-      <a-gltf-model
-        id="secondary-cabinet-left"
-        src="#model-cabinet-left"
-        position="-3.35 0 -2.08"
-        rotation="0 56 0"
-        fit-model="height: 1.78; center: true; floor: true"
-      ></a-gltf-model>
+      <a-gltf-model id="priestess-figure" src="#model-priestess" position="0.92 0 -3.42" rotation="0 -24 0" fit-model="height: 1.72; center: true; floor: true" hide-on-model-ready="target: #priestess-proxy"></a-gltf-model>
 
-      <a-gltf-model
-        id="secondary-cabinet-right"
-        src="#model-cabinet-right"
-        position="3.35 0 -2.08"
-        rotation="0 -56 0"
-        fit-model="height: 1.78; center: true; floor: true"
-      ></a-gltf-model>
+      <a-entity id="left-cabinet-proxy" position="-3.35 0 -2.08" rotation="0 56 0">
+        <a-box position="0 0.9 0" width="1.0" height="1.8" depth="0.62" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
+        <a-plane position="0 1.28 0.32" width="0.72" height="0.46" material="shader: flat; color: #65dfff; transparent: true; opacity: 0.18"></a-plane>
+      </a-entity>
+      <a-gltf-model id="secondary-cabinet-left" src="#model-cabinet-left" position="-3.35 0 -2.08" rotation="0 56 0" fit-model="height: 1.78; center: true; floor: true" hide-on-model-ready="target: #left-cabinet-proxy"></a-gltf-model>
+
+      <a-entity id="right-cabinet-proxy" position="3.35 0 -2.08" rotation="0 -56 0">
+        <a-box position="0 0.9 0" width="1.0" height="1.8" depth="0.62" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
+        <a-plane position="0 1.28 0.32" width="0.72" height="0.46" material="shader: flat; color: #ffb36b; transparent: true; opacity: 0.18"></a-plane>
+      </a-entity>
+      <a-gltf-model id="secondary-cabinet-right" src="#model-cabinet-right" position="3.35 0 -2.08" rotation="0 -56 0" fit-model="height: 1.78; center: true; floor: true" hide-on-model-ready="target: #right-cabinet-proxy"></a-gltf-model>
     </a-entity>
 
     <a-entity id="player-rig" position="0 0 0.75">
-      <a-entity
-        id="camera"
-        camera
-        position="0 1.6 0"
-        look-controls="touchEnabled: true; mouseEnabled: true; pointerLockEnabled: false"
-        wasd-controls="acceleration: 18; fly: false"
-      >
-        <a-entity
-          id="gaze-cursor"
-          position="0 0 -1"
-          cursor="fuse: true; fuseTimeout: 1100"
-          raycaster="objects: .clickable; far: 10; interval: 80"
-          geometry="primitive: ring; radiusInner: 0.006; radiusOuter: 0.011; segmentsTheta: 32"
-          material="shader: flat; color: #ffffff; opacity: 0.9"
-          animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.22 0.22 0.22; dur: 1100; easing: easeInCubic"
-          animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1; dur: 180; easing: easeOutQuad"
-        ></a-entity>
+      <a-entity id="camera" camera position="0 1.6 0" look-controls="touchEnabled: true; mouseEnabled: true; pointerLockEnabled: false" wasd-controls="acceleration: 18; fly: false">
+        <a-entity id="gaze-cursor" position="0 0 -1" cursor="fuse: false" raycaster="objects: .clickable; far: 10; interval: 80" geometry="primitive: ring; radiusInner: 0.006; radiusOuter: 0.011; segmentsTheta: 32" material="shader: flat; color: #ffffff; opacity: 0.9" animation__click="property: scale; startEvents: click; from: 0.55 0.55 0.55; to: 1 1 1; dur: 160; easing: easeOutQuad"></a-entity>
       </a-entity>
 
-      <a-entity
-        id="right-controller"
-        laser-controls="hand: right"
-        raycaster="objects: .clickable; far: 10; interval: 80"
-        line="color: #ff0038; opacity: 0.55"
-      ></a-entity>
-
-      <a-entity
-        id="left-controller"
-        laser-controls="hand: left"
-        raycaster="objects: .clickable; far: 10; interval: 80"
-        line="color: #65dfff; opacity: 0.32"
-      ></a-entity>
+      <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .clickable; far: 10; interval: 80" line="color: #ff0038; opacity: 0.55"></a-entity>
+      <a-entity id="left-controller" laser-controls="hand: left" raycaster="objects: .clickable; far: 10; interval: 80" line="color: #65dfff; opacity: 0.32"></a-entity>
     </a-entity>
   </a-scene>
 </body>
