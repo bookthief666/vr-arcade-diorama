@@ -2,281 +2,3430 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GEIST Arcade | Liber 333 Oracle</title>
+  <title>GEIST Arcade VR Diorama</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
 
   <style>
-    :root { color-scheme: dark; --red: #ff0038; --cyan: #65dfff; --void: #020004; }
-    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--void); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    #entry-overlay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 22px; background: radial-gradient(circle at 50% 42%, rgba(125, 0, 55, 0.26), transparent 32%), radial-gradient(circle at 50% 50%, rgba(20, 0, 18, 0.92), rgba(0, 0, 0, 0.98) 70%); transition: opacity 420ms ease; }
-    #entry-overlay.hidden { opacity: 0; pointer-events: none; }
-    #entry-overlay::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0, rgba(255,255,255,.035) 1px, transparent 2px, transparent 5px); opacity: .42; pointer-events: none; animation: scanlines 8s linear infinite; }
-    @keyframes scanlines { from { transform: translateY(0); } to { transform: translateY(18px); } }
-    #entry-panel { position: relative; width: min(92vw, 560px); padding: 28px 22px 24px; border: 1px solid rgba(255,35,92,.52); border-radius: 22px; background: linear-gradient(180deg, rgba(28,0,18,.94), rgba(6,0,8,.97)); box-shadow: 0 0 28px rgba(255,0,62,.18), 0 0 88px rgba(100,0,180,.12), inset 0 0 24px rgba(255,0,70,.08); text-align: center; overflow: hidden; }
-    #entry-panel::before { content: ""; position: absolute; left: -30%; right: -30%; top: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,0,64,.95), transparent); box-shadow: 0 0 16px rgba(255,0,64,.75); animation: sweep 2.8s linear infinite; }
-    @keyframes sweep { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(330px); opacity: 0; } }
-    .entry-kicker { margin: 0 0 10px; color: rgba(255,160,190,.76); font-size: 11px; font-weight: 800; letter-spacing: .28em; text-transform: uppercase; }
-    .entry-title { margin: 0; color: #fff1f5; font-size: clamp(26px, 7vw, 46px); line-height: .98; letter-spacing: .05em; text-transform: uppercase; text-shadow: 0 0 12px rgba(255,0,64,.45), 0 0 34px rgba(120,0,255,.24); }
-    .entry-sub { margin: 14px auto 18px; max-width: 410px; color: rgba(210,225,255,.72); font-size: 12px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; }
-    #load-track { width: min(100%, 430px); height: 10px; margin: 0 auto 16px; border: 1px solid rgba(255,0,64,.36); border-radius: 999px; background: rgba(8,0,8,.88); overflow: hidden; box-shadow: inset 0 0 12px rgba(255,0,64,.12); }
-    #load-bar { width: 0%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(255,0,64,.55), rgba(255,80,120,.98), rgba(100,225,255,.78)); box-shadow: 0 0 14px rgba(255,0,64,.62); transition: width 220ms ease; }
-    #enter-button { appearance: none; width: min(100%, 430px); min-height: 64px; border: 1px solid rgba(255,0,64,.42); border-radius: 16px; background: linear-gradient(180deg, rgba(34,0,18,.98), rgba(7,0,8,.98)); color: rgba(255,220,230,.68); font-size: 15px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,0,64,.22); box-shadow: inset 0 0 18px rgba(255,0,64,.08); }
-    #enter-button.ready { cursor: pointer; color: #fff1f4; border-color: rgba(255,50,104,.92); box-shadow: 0 0 24px rgba(255,0,64,.34), inset 0 0 18px rgba(255,0,64,.12); }
-    #status-line { margin-top: 12px; min-height: 16px; color: rgba(255,170,200,.68); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
-    #oracle-toast, #model-status { position: fixed; z-index: 20; pointer-events: none; border: 1px solid rgba(255,0,64,.48); background: rgba(0,0,0,.74); color: #ffdbe4; text-shadow: 0 0 10px rgba(255,0,64,.46); }
-    #oracle-toast { left: 50%; bottom: 22px; transform: translateX(-50%) translateY(16px); opacity: 0; padding: 10px 14px; border-radius: 999px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; transition: opacity 180ms ease, transform 180ms ease; }
-    #oracle-toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-    #model-status { left: 10px; top: 10px; max-width: 360px; padding: 8px 10px; border-radius: 10px; opacity: .82; font-size: 11px; line-height: 1.35; color: rgba(255,220,230,.78); }
-  </style>
+    body {
+      margin: 0;
+      background: #020006;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+    }
+
+    #notice {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      color: #ff3448;
+      background: rgba(0, 0, 0, 0.66);
+      border: 1px solid rgba(255, 0, 48, 0.5);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      max-width: 340px;
+      text-shadow: 0 0 8px #ff0030;
+    }
+  
+    #audio-start {
+      position: fixed;
+      left: 12px;
+      bottom: 14px;
+      z-index: 20;
+      border: 1px solid rgba(255, 0, 64, 0.65);
+      background: rgba(0, 0, 0, 0.72);
+      color: #ff355d;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 8px #ff0038;
+      box-shadow: 0 0 18px rgba(255, 0, 64, 0.25);
+    }
+
+    #audio-start.playing {
+      color: #8dffda;
+      border-color: rgba(0, 255, 190, 0.6);
+      text-shadow: 0 0 8px #00ffc8;
+    }
+  
+    #entry-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at center, rgba(35, 0, 18, 0.46) 0%, rgba(0, 0, 0, 0.78) 58%, rgba(0, 0, 0, 0.92) 100%);
+      backdrop-filter: blur(2px);
+      pointer-events: auto;
+      overflow: hidden;
+    }
+
+    #entry-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 480ms ease;
+    }
+
+    #entry-overlay::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.028) 0px,
+          rgba(255,255,255,0.028) 1px,
+          transparent 2px,
+          transparent 5px
+        );
+      opacity: 0.65;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      animation: overlayScan 8s linear infinite;
+    }
+
+    @keyframes overlayScan {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(18px); }
+    }
+
+    #entry-panel {
+      position: relative;
+      width: min(86vw, 560px);
+      padding: 28px 22px 24px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 35, 85, 0.45);
+      background:
+        linear-gradient(180deg, rgba(20, 0, 12, 0.88), rgba(8, 0, 8, 0.94));
+      box-shadow:
+        0 0 26px rgba(255, 0, 70, 0.22),
+        0 0 80px rgba(95, 0, 255, 0.08),
+        inset 0 0 22px rgba(255, 0, 70, 0.08);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #entry-panel::before {
+      content: "";
+      position: absolute;
+      left: -20%;
+      right: -20%;
+      top: -2px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,0,80,0.95), transparent);
+      box-shadow: 0 0 14px rgba(255, 0, 70, 0.7);
+      animation: entrySweep 2.4s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes entrySweep {
+      0%   { transform: translateY(0); opacity: 0.0; }
+      10%  { opacity: 1; }
+      100% { transform: translateY(290px); opacity: 0.0; }
+    }
+
+    .entry-kicker {
+      margin: 0 0 10px;
+      font-size: 11px;
+      letter-spacing: 0.34em;
+      color: rgba(255, 110, 140, 0.82);
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(255, 0, 70, 0.35);
+    }
+
+    .entry-sub {
+      margin: 14px 0 0;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: rgba(190, 225, 255, 0.72);
+      text-transform: uppercase;
+    }
+
+    #audio-start {
+      appearance: none;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: min(76vw, 420px);
+      min-height: 76px;
+      margin: 12px auto 0;
+      padding: 16px 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 0, 76, 0.62);
+      background:
+        linear-gradient(180deg, rgba(34, 0, 18, 0.95), rgba(9, 0, 8, 0.98));
+      color: #ffd4dc;
+      cursor: pointer;
+      font-weight: 800;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      text-shadow:
+        0 0 8px rgba(255, 0, 70, 0.65),
+        0 0 14px rgba(255, 0, 70, 0.26);
+      box-shadow:
+        0 0 18px rgba(255, 0, 70, 0.22),
+        inset 0 0 18px rgba(255, 30, 90, 0.10);
+      overflow: hidden;
+      transition: transform 140ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    #audio-start:hover,
+    #audio-start:active {
+      transform: translateY(-1px) scale(1.01);
+      border-color: rgba(255, 60, 110, 0.85);
+      box-shadow:
+        0 0 22px rgba(255, 0, 70, 0.32),
+        0 0 46px rgba(20, 130, 255, 0.10),
+        inset 0 0 18px rgba(255, 30, 90, 0.16);
+    }
+
+    #audio-start.playing {
+      color: #cffff4;
+      border-color: rgba(0, 255, 190, 0.58);
+      text-shadow:
+        0 0 8px rgba(0, 255, 200, 0.65),
+        0 0 14px rgba(0, 255, 200, 0.28);
+      box-shadow:
+        0 0 22px rgba(0, 255, 200, 0.16),
+        inset 0 0 18px rgba(0, 255, 200, 0.10);
+    }
+
+    #audio-start::before,
+    #audio-start::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    #audio-start::before {
+      background:
+        linear-gradient(90deg,
+          rgba(255, 0, 70, 0.00) 0%,
+          rgba(255, 0, 70, 0.18) 48%,
+          rgba(255, 0, 70, 0.00) 100%);
+      transform: translateX(-120%);
+      animation: btnSweep 2.6s linear infinite;
+    }
+
+    #audio-start::after {
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.05) 0px,
+          rgba(255,255,255,0.05) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      opacity: 0.32;
+    }
+
+    @keyframes btnSweep {
+      0%   { transform: translateX(-120%); opacity: 0.0; }
+      20%  { opacity: 1; }
+      100% { transform: translateX(120%); opacity: 0.0; }
+    }
+
+    .glitch-wrap {
+      position: relative;
+      display: inline-block;
+      line-height: 1.05;
+    }
+
+    .glitch-main,
+    .glitch-red,
+    .glitch-cyan {
+      display: block;
+      font-size: clamp(22px, 4.8vw, 34px);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .glitch-main {
+      position: relative;
+      z-index: 3;
+      color: #ffeaf0;
+    }
+
+    .glitch-red,
+    .glitch-cyan {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      opacity: 0.82;
+      pointer-events: none;
+    }
+
+    .glitch-red {
+      color: #ff255d;
+      animation: glitchRed 1.4s steps(2, end) infinite;
+    }
+
+    .glitch-cyan {
+      color: #40d8ff;
+      animation: glitchCyan 1.1s steps(2, end) infinite;
+    }
+
+    @keyframes glitchRed {
+      0%, 88%, 100% { transform: translate(0,0); opacity: 0.0; }
+      89% { transform: translate(-2px, 0); opacity: 0.9; }
+      91% { transform: translate(2px, -1px); opacity: 0.6; }
+      94% { transform: translate(-3px, 1px); opacity: 0.85; }
+      97% { transform: translate(1px, 0); opacity: 0.0; }
+    }
+
+    @keyframes glitchCyan {
+      0%, 85%, 100% { transform: translate(0,0); opacity: 0.0; }
+      86% { transform: translate(2px, 0); opacity: 0.7; }
+      89% { transform: translate(-1px, 1px); opacity: 0.9; }
+      92% { transform: translate(3px, -1px); opacity: 0.65; }
+      96% { transform: translate(0,0); opacity: 0.0; }
+    }
+
+    .entry-track {
+      margin-top: 12px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: rgba(255, 210, 225, 0.68);
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 640px) {
+      #entry-panel {
+        width: min(90vw, 520px);
+        padding: 22px 16px 20px;
+      }
+
+      #audio-start {
+        min-width: min(84vw, 420px);
+        min-height: 70px;
+        padding: 14px 14px;
+      }
+
+      .glitch-main,
+      .glitch-red,
+      .glitch-cyan {
+        white-space: normal;
+      }
+    }
+  
+    /* enhanced entry overlay v2 */
+    #entry-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at center, rgba(55, 0, 22, 0.34) 0%, rgba(15, 0, 10, 0.66) 38%, rgba(0, 0, 0, 0.90) 100%);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    #entry-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 520ms ease;
+    }
+
+    #entry-overlay::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.03) 0px,
+          rgba(255,255,255,0.03) 1px,
+          transparent 2px,
+          transparent 5px
+        );
+      mix-blend-mode: screen;
+      opacity: 0.52;
+      animation: entryScanDrift 8s linear infinite;
+      pointer-events: none;
+    }
+
+    #entry-overlay::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 0, 85, 0.06), transparent 26%),
+        radial-gradient(circle at 18% 22%, rgba(0, 220, 255, 0.05), transparent 18%),
+        radial-gradient(circle at 82% 76%, rgba(120, 0, 255, 0.06), transparent 18%);
+      pointer-events: none;
+      mix-blend-mode: screen;
+      animation: overlayGlowBreath 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes entryScanDrift {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(18px); }
+    }
+
+    @keyframes overlayGlowBreath {
+      0%   { opacity: 0.55; }
+      100% { opacity: 0.95; }
+    }
+
+    .entry-bg-grid {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(255, 0, 70, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(50, 180, 255, 0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 18%, transparent 78%);
+      opacity: 0.45;
+      pointer-events: none;
+      animation: gridFloat 12s linear infinite;
+    }
+
+    @keyframes gridFloat {
+      0%   { transform: translate3d(0,0,0); }
+      100% { transform: translate3d(22px,14px,0); }
+    }
+
+    .entry-floating-sparks {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .entry-floating-sparks span {
+      position: absolute;
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,0,80,0.35) 55%, transparent 72%);
+      box-shadow: 0 0 12px rgba(255, 0, 80, 0.5);
+      opacity: 0.75;
+    }
+
+    .entry-floating-sparks span:nth-child(1) { left: 19%; top: 24%; animation: sparkFloat1 4.1s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(2) { left: 28%; top: 72%; animation: sparkFloat2 5.0s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(3) { left: 66%; top: 23%; animation: sparkFloat3 4.6s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(4) { left: 78%; top: 66%; animation: sparkFloat2 5.4s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(5) { left: 50%; top: 16%; animation: sparkFloat1 3.8s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(6) { left: 58%; top: 82%; animation: sparkFloat3 5.2s ease-in-out infinite; }
+
+    @keyframes sparkFloat1 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.7); opacity: 0.38; }
+      50%     { transform: translate3d(10px,-18px,0) scale(1.18); opacity: 0.95; }
+    }
+
+    @keyframes sparkFloat2 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.9); opacity: 0.35; }
+      50%     { transform: translate3d(-14px,12px,0) scale(1.15); opacity: 0.82; }
+    }
+
+    @keyframes sparkFloat3 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.75); opacity: 0.42; }
+      50%     { transform: translate3d(12px,16px,0) scale(1.06); opacity: 0.88; }
+    }
+
+    #entry-panel {
+      position: relative;
+      width: min(90vw, 660px);
+      padding: 30px 28px 22px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 35, 90, 0.42);
+      background:
+        linear-gradient(180deg, rgba(30, 0, 16, 0.93), rgba(7, 0, 10, 0.96)),
+        radial-gradient(circle at 50% 32%, rgba(255, 0, 80, 0.08), transparent 45%);
+      box-shadow:
+        0 0 24px rgba(255, 0, 76, 0.18),
+        0 0 90px rgba(80, 0, 255, 0.10),
+        inset 0 0 32px rgba(255, 0, 70, 0.08);
+      text-align: center;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    #entry-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255, 0, 76, 0.35), rgba(0, 220, 255, 0.18), rgba(255,0,76,0.22));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .entry-ornament-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      pointer-events: none;
+      opacity: 0.42;
+      mix-blend-mode: screen;
+    }
+
+    .entry-ornament-ring-a {
+      width: 520px;
+      height: 520px;
+      border: 1px solid rgba(255, 30, 88, 0.18);
+      box-shadow: 0 0 24px rgba(255, 0, 76, 0.12);
+      animation: haloSpinA 18s linear infinite;
+    }
+
+    .entry-ornament-ring-b {
+      width: 390px;
+      height: 390px;
+      border: 1px dashed rgba(90, 210, 255, 0.22);
+      box-shadow: 0 0 18px rgba(0, 220, 255, 0.12);
+      animation: haloSpinB 11s linear infinite reverse;
+    }
+
+    @keyframes haloSpinA {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes haloSpinB {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .entry-corner {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-color: rgba(255, 50, 100, 0.68);
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px rgba(255,0,76,0.38));
+      animation: cornerPulse 2.4s ease-in-out infinite alternate;
+    }
+
+    .entry-corner-tl { top: 14px; left: 14px; border-top: 2px solid; border-left: 2px solid; }
+    .entry-corner-tr { top: 14px; right: 14px; border-top: 2px solid; border-right: 2px solid; }
+    .entry-corner-bl { bottom: 14px; left: 14px; border-bottom: 2px solid; border-left: 2px solid; }
+    .entry-corner-br { bottom: 14px; right: 14px; border-bottom: 2px solid; border-right: 2px solid; }
+
+    @keyframes cornerPulse {
+      0%   { opacity: 0.55; transform: scale(1); }
+      100% { opacity: 0.95; transform: scale(1.06); }
+    }
+
+    .entry-topline {
+      position: relative;
+      z-index: 3;
+      margin-bottom: 14px;
+      font-size: 10px;
+      letter-spacing: 0.30em;
+      text-transform: uppercase;
+      color: rgba(255, 170, 195, 0.68);
+      text-shadow: 0 0 8px rgba(255, 0, 76, 0.30);
+    }
+
+    .entry-glyph-row {
+      position: relative;
+      z-index: 3;
+      margin-bottom: 8px;
+      font-size: 17px;
+      letter-spacing: 0.28em;
+      color: rgba(255, 72, 115, 0.85);
+      text-shadow:
+        0 0 10px rgba(255, 0, 76, 0.34),
+        0 0 14px rgba(50, 200, 255, 0.12);
+    }
+
+    .entry-kicker {
+      position: relative;
+      z-index: 3;
+      margin: 0 0 16px;
+      font-size: 12px;
+      letter-spacing: 0.34em;
+      color: rgba(230, 245, 255, 0.72);
+      text-transform: uppercase;
+    }
+
+    #audio-start {
+      appearance: none;
+      position: relative;
+      z-index: 4;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: min(82vw, 500px);
+      min-height: 108px;
+      margin: 6px auto 0;
+      padding: 20px 18px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 40, 95, 0.65);
+      background:
+        linear-gradient(180deg, rgba(34, 0, 16, 0.95), rgba(8, 0, 10, 0.98)),
+        radial-gradient(circle at 50% 45%, rgba(255, 0, 76, 0.12), transparent 60%);
+      color: #ffeaf0;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow:
+        0 0 18px rgba(255, 0, 76, 0.18),
+        0 0 52px rgba(80, 0, 255, 0.08),
+        inset 0 0 20px rgba(255, 35, 90, 0.08);
+      transition: transform 140ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    #audio-start:hover,
+    #audio-start:active {
+      transform: translateY(-1px) scale(1.01);
+      border-color: rgba(255, 75, 120, 0.85);
+      box-shadow:
+        0 0 24px rgba(255, 0, 76, 0.26),
+        0 0 64px rgba(0, 210, 255, 0.12),
+        inset 0 0 22px rgba(255, 35, 90, 0.14);
+    }
+
+    #audio-start.playing {
+      border-color: rgba(0, 255, 210, 0.55);
+      box-shadow:
+        0 0 22px rgba(0, 255, 200, 0.20),
+        inset 0 0 22px rgba(0, 255, 200, 0.08);
+    }
+
+    .entry-button-frame,
+    .entry-button-glow {
+      position: absolute;
+      inset: 8px;
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .entry-button-frame {
+      border: 1px solid rgba(255, 70, 118, 0.22);
+      box-shadow: inset 0 0 14px rgba(255, 0, 76, 0.08);
+    }
+
+    .entry-button-glow {
+      background:
+        linear-gradient(90deg, transparent, rgba(255, 0, 70, 0.12), transparent),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.04) 0px,
+          rgba(255,255,255,0.04) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      mix-blend-mode: screen;
+      animation: buttonSweep 2.8s linear infinite;
+      opacity: 0.65;
+    }
+
+    @keyframes buttonSweep {
+      0%   { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .glitch-wrap {
+      position: relative;
+      display: inline-block;
+      z-index: 3;
+      line-height: 1.02;
+    }
+
+    .glitch-main,
+    .glitch-red,
+    .glitch-cyan {
+      display: block;
+      font-size: clamp(24px, 4.8vw, 38px);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .glitch-main {
+      position: relative;
+      z-index: 3;
+      color: #fff2f5;
+      text-shadow:
+        0 0 10px rgba(255, 0, 76, 0.26),
+        0 0 20px rgba(0, 215, 255, 0.08);
+    }
+
+    .glitch-red,
+    .glitch-cyan {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.0;
+    }
+
+    .glitch-red {
+      color: #ff245d;
+      animation: glitchRedStrong 1.5s steps(2, end) infinite;
+    }
+
+    .glitch-cyan {
+      color: #42d7ff;
+      animation: glitchCyanStrong 1.1s steps(2, end) infinite;
+    }
+
+    @keyframes glitchRedStrong {
+      0%, 85%, 100% { transform: translate(0,0); opacity: 0; }
+      86% { transform: translate(-3px, 0); opacity: 0.84; }
+      89% { transform: translate(2px, -1px); opacity: 0.62; }
+      93% { transform: translate(-2px, 1px); opacity: 0.82; }
+      96% { transform: translate(1px, 0); opacity: 0; }
+    }
+
+    @keyframes glitchCyanStrong {
+      0%, 87%, 100% { transform: translate(0,0); opacity: 0; }
+      88% { transform: translate(2px, 0); opacity: 0.72; }
+      91% { transform: translate(-1px, 1px); opacity: 0.86; }
+      95% { transform: translate(3px, -1px); opacity: 0.55; }
+      97% { transform: translate(0,0); opacity: 0; }
+    }
+
+    .entry-button-sub {
+      position: relative;
+      z-index: 3;
+      display: block;
+      margin-top: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      color: rgba(255, 190, 210, 0.68);
+      text-transform: uppercase;
+    }
+
+    .entry-track {
+      position: relative;
+      z-index: 3;
+      margin-top: 16px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: rgba(210, 238, 255, 0.72);
+      text-transform: uppercase;
+    }
+
+    .entry-sub {
+      position: relative;
+      z-index: 3;
+      margin-top: 10px;
+      font-size: 12px;
+      letter-spacing: 0.09em;
+      color: rgba(255, 210, 225, 0.68);
+      text-transform: uppercase;
+    }
+
+    .entry-footerline {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 70, 118, 0.16);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(160, 220, 255, 0.66);
+    }
+
+    @media (max-width: 700px) {
+      #entry-panel {
+        width: min(92vw, 660px);
+        padding: 24px 16px 18px;
+      }
+
+      .entry-topline,
+      .entry-button-sub,
+      .entry-footerline {
+        letter-spacing: 0.12em;
+      }
+
+      .entry-footerline {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #audio-start {
+        width: min(86vw, 500px);
+        min-height: 98px;
+        padding: 18px 12px 14px;
+      }
+
+      .entry-ornament-ring-a { width: 420px; height: 420px; }
+      .entry-ornament-ring-b { width: 310px; height: 310px; }
+    }
+
+
+    /* pixel occult entry overlay v3 */
+
+    #entry-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at center, rgba(60, 0, 28, 0.24) 0%, rgba(18, 0, 10, 0.66) 42%, rgba(0, 0, 0, 0.94) 100%);
+      overflow: hidden;
+      isolation: isolate;
+      pointer-events: auto;
+    }
+
+    #entry-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 520ms ease;
+    }
+
+    #entry-overlay::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.03) 0px,
+          rgba(255,255,255,0.03) 1px,
+          transparent 2px,
+          transparent 5px
+        );
+      opacity: 0.54;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      animation: entryScanDrift 8s linear infinite;
+    }
+
+    .entry-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at center, transparent 24%, rgba(0,0,0,0.24) 70%, rgba(0,0,0,0.66) 100%);
+    }
+
+    @keyframes entryScanDrift {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(18px); }
+    }
+
+    .entry-bg-grid {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(255, 0, 80, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(70, 185, 255, 0.05) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black 18%, transparent 78%);
+      opacity: 0.42;
+      pointer-events: none;
+      animation: gridFloat 12s linear infinite;
+    }
+
+    @keyframes gridFloat {
+      0%   { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(20px, 14px, 0); }
+    }
+
+    .entry-floating-sparks {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .entry-floating-sparks span {
+      position: absolute;
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,0,90,0.38) 55%, transparent 72%);
+      box-shadow: 0 0 12px rgba(255, 0, 90, 0.55);
+      opacity: 0.75;
+    }
+
+    .entry-floating-sparks span:nth-child(1) { left: 15%; top: 24%; animation: sparkFloat1 4.1s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(2) { left: 24%; top: 74%; animation: sparkFloat2 5.0s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(3) { left: 38%; top: 17%; animation: sparkFloat3 4.5s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(4) { left: 62%; top: 20%; animation: sparkFloat2 5.4s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(5) { left: 72%; top: 68%; animation: sparkFloat1 4.2s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(6) { left: 82%; top: 36%; animation: sparkFloat3 5.1s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(7) { left: 48%; top: 84%; animation: sparkFloat2 5.8s ease-in-out infinite; }
+    .entry-floating-sparks span:nth-child(8) { left: 58%; top: 12%; animation: sparkFloat1 4.6s ease-in-out infinite; }
+
+    @keyframes sparkFloat1 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.7); opacity: 0.38; }
+      50%     { transform: translate3d(10px,-18px,0) scale(1.18); opacity: 0.95; }
+    }
+    @keyframes sparkFloat2 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.9); opacity: 0.35; }
+      50%     { transform: translate3d(-14px,12px,0) scale(1.15); opacity: 0.82; }
+    }
+    @keyframes sparkFloat3 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.75); opacity: 0.42; }
+      50%     { transform: translate3d(12px,16px,0) scale(1.06); opacity: 0.88; }
+    }
+
+    #entry-panel {
+      position: relative;
+      width: min(92vw, 700px);
+      padding: 30px 28px 22px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 35, 90, 0.42);
+      background:
+        linear-gradient(180deg, rgba(28, 0, 18, 0.95), rgba(8, 0, 12, 0.98)),
+        radial-gradient(circle at 50% 30%, rgba(255, 0, 90, 0.08), transparent 44%);
+      box-shadow:
+        0 0 24px rgba(255, 0, 76, 0.18),
+        0 0 90px rgba(80, 0, 255, 0.10),
+        inset 0 0 32px rgba(255, 0, 70, 0.08);
+      text-align: center;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    #entry-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255, 0, 76, 0.35), rgba(0, 220, 255, 0.18), rgba(255,0,76,0.22));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .entry-ornament-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      pointer-events: none;
+      opacity: 0.42;
+      mix-blend-mode: screen;
+    }
+
+    .entry-ornament-ring-a {
+      width: 560px;
+      height: 560px;
+      border: 1px solid rgba(255, 30, 88, 0.18);
+      box-shadow: 0 0 24px rgba(255, 0, 76, 0.12);
+      animation: haloSpinA 18s linear infinite;
+    }
+
+    .entry-ornament-ring-b {
+      width: 420px;
+      height: 420px;
+      border: 1px dashed rgba(90, 210, 255, 0.22);
+      box-shadow: 0 0 18px rgba(0, 220, 255, 0.12);
+      animation: haloSpinB 11s linear infinite reverse;
+    }
+
+    .entry-ornament-ring-c {
+      width: 300px;
+      height: 300px;
+      border: 1px solid rgba(255, 90, 140, 0.16);
+      box-shadow: 0 0 14px rgba(255, 0, 76, 0.08);
+      animation: haloPulse 2.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes haloSpinA {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes haloSpinB {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes haloPulse {
+      0%   { opacity: 0.18; transform: translate(-50%, -50%) scale(0.98); }
+      100% { opacity: 0.38; transform: translate(-50%, -50%) scale(1.03); }
+    }
+
+    .entry-corner {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-color: rgba(255, 50, 100, 0.72);
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px rgba(255,0,76,0.38));
+      animation: cornerPulse 2.4s ease-in-out infinite alternate;
+    }
+
+    .entry-corner-tl { top: 14px; left: 14px; border-top: 2px solid; border-left: 2px solid; }
+    .entry-corner-tr { top: 14px; right: 14px; border-top: 2px solid; border-right: 2px solid; }
+    .entry-corner-bl { bottom: 14px; left: 14px; border-bottom: 2px solid; border-left: 2px solid; }
+    .entry-corner-br { bottom: 14px; right: 14px; border-bottom: 2px solid; border-right: 2px solid; }
+
+    @keyframes cornerPulse {
+      0%   { opacity: 0.55; transform: scale(1); }
+      100% { opacity: 0.95; transform: scale(1.06); }
+    }
+
+    .entry-topline {
+      position: relative;
+      z-index: 3;
+      margin-bottom: 14px;
+      font-family: "VT323", monospace;
+      font-size: 20px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 170, 195, 0.72);
+      text-shadow: 0 0 8px rgba(255, 0, 76, 0.30);
+    }
+
+    .entry-glyph-row {
+      position: relative;
+      z-index: 3;
+      margin-bottom: 8px;
+      font-family: "VT323", monospace;
+      font-size: 22px;
+      letter-spacing: 0.26em;
+      color: rgba(255, 72, 115, 0.85);
+      text-shadow:
+        0 0 10px rgba(255, 0, 76, 0.34),
+        0 0 14px rgba(50, 200, 255, 0.12);
+    }
+
+    .entry-kicker {
+      position: relative;
+      z-index: 3;
+      margin: 0 0 14px;
+      font-family: "VT323", monospace;
+      font-size: 22px;
+      letter-spacing: 0.14em;
+      color: rgba(230, 245, 255, 0.78);
+      text-transform: uppercase;
+    }
+
+    .entry-title-stack {
+      position: relative;
+      z-index: 3;
+      margin-bottom: 18px;
+    }
+
+    .entry-title-main,
+    .entry-title-sub {
+      font-family: "Press Start 2P", monospace;
+      text-transform: uppercase;
+      line-height: 1.16;
+      color: #fff1f5;
+      text-shadow:
+        0 0 10px rgba(255, 0, 76, 0.24),
+        0 0 20px rgba(0, 215, 255, 0.08);
+    }
+
+    .entry-title-main {
+      font-size: clamp(26px, 4.5vw, 42px);
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .entry-title-sub {
+      font-size: clamp(18px, 3vw, 24px);
+      letter-spacing: 0.16em;
+      color: #ffccd9;
+    }
+
+    #audio-start {
+      appearance: none;
+      position: relative;
+      z-index: 4;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: min(84vw, 540px);
+      min-height: 118px;
+      margin: 6px auto 0;
+      padding: 22px 18px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 40, 95, 0.68);
+      background:
+        linear-gradient(180deg, rgba(34, 0, 16, 0.96), rgba(8, 0, 10, 0.99)),
+        radial-gradient(circle at 50% 45%, rgba(255, 0, 76, 0.12), transparent 60%);
+      color: #ffeaf0;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow:
+        0 0 18px rgba(255, 0, 76, 0.18),
+        0 0 52px rgba(80, 0, 255, 0.08),
+        inset 0 0 20px rgba(255, 35, 90, 0.08);
+      transition: transform 140ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    #audio-start:hover,
+    #audio-start:active {
+      transform: translateY(-1px) scale(1.01);
+      border-color: rgba(255, 75, 120, 0.85);
+      box-shadow:
+        0 0 24px rgba(255, 0, 76, 0.26),
+        0 0 64px rgba(0, 210, 255, 0.12),
+        inset 0 0 22px rgba(255, 35, 90, 0.14);
+    }
+
+    #audio-start.playing {
+      border-color: rgba(0, 255, 210, 0.55);
+      box-shadow:
+        0 0 22px rgba(0, 255, 200, 0.20),
+        inset 0 0 22px rgba(0, 255, 200, 0.08);
+    }
+
+    .entry-button-frame,
+    .entry-button-glow,
+    .entry-button-grid {
+      position: absolute;
+      inset: 8px;
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .entry-button-frame {
+      border: 1px solid rgba(255, 70, 118, 0.24);
+      box-shadow: inset 0 0 14px rgba(255, 0, 76, 0.08);
+    }
+
+    .entry-button-glow {
+      background:
+        linear-gradient(90deg, transparent, rgba(255, 0, 70, 0.12), transparent),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.04) 0px,
+          rgba(255,255,255,0.04) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      mix-blend-mode: screen;
+      animation: buttonSweep 2.8s linear infinite;
+      opacity: 0.65;
+    }
+
+    .entry-button-grid {
+      background:
+        linear-gradient(to right, rgba(255, 0, 70, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(70, 190, 255, 0.03) 1px, transparent 1px);
+      background-size: 16px 16px;
+      opacity: 0.32;
+    }
+
+    @keyframes buttonSweep {
+      0%   { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .glitch-wrap {
+      position: relative;
+      display: inline-block;
+      z-index: 3;
+      line-height: 1.12;
+    }
+
+    .glitch-main,
+    .glitch-red,
+    .glitch-cyan {
+      display: block;
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(14px, 2.2vw, 22px);
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .glitch-main {
+      position: relative;
+      z-index: 3;
+      color: #fff2f5;
+      text-shadow:
+        0 0 10px rgba(255, 0, 76, 0.26),
+        0 0 20px rgba(0, 215, 255, 0.08);
+    }
+
+    .glitch-red,
+    .glitch-cyan {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.0;
+    }
+
+    .glitch-red {
+      color: #ff245d;
+      animation: glitchRedStrong 1.5s steps(2, end) infinite;
+    }
+
+    .glitch-cyan {
+      color: #42d7ff;
+      animation: glitchCyanStrong 1.1s steps(2, end) infinite;
+    }
+
+    @keyframes glitchRedStrong {
+      0%, 85%, 100% { transform: translate(0,0); opacity: 0; }
+      86% { transform: translate(-3px, 0); opacity: 0.84; }
+      89% { transform: translate(2px, -1px); opacity: 0.62; }
+      93% { transform: translate(-2px, 1px); opacity: 0.82; }
+      96% { transform: translate(1px, 0); opacity: 0; }
+    }
+
+    @keyframes glitchCyanStrong {
+      0%, 87%, 100% { transform: translate(0,0); opacity: 0; }
+      88% { transform: translate(2px, 0); opacity: 0.72; }
+      91% { transform: translate(-1px, 1px); opacity: 0.86; }
+      95% { transform: translate(3px, -1px); opacity: 0.55; }
+      97% { transform: translate(0,0); opacity: 0; }
+    }
+
+    .entry-button-sub {
+      position: relative;
+      z-index: 3;
+      display: block;
+      margin-top: 10px;
+      font-family: "VT323", monospace;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: rgba(255, 190, 210, 0.76);
+      text-transform: uppercase;
+    }
+
+    .entry-track {
+      position: relative;
+      z-index: 3;
+      margin-top: 16px;
+      font-family: "VT323", monospace;
+      font-size: 22px;
+      letter-spacing: 0.12em;
+      color: rgba(210, 238, 255, 0.78);
+      text-transform: uppercase;
+    }
+
+    .entry-sub {
+      position: relative;
+      z-index: 3;
+      margin-top: 10px;
+      font-family: "VT323", monospace;
+      font-size: 22px;
+      letter-spacing: 0.10em;
+      color: rgba(255, 210, 225, 0.70);
+      text-transform: uppercase;
+    }
+
+    .entry-footerline {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 70, 118, 0.16);
+      font-family: "VT323", monospace;
+      font-size: 20px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(160, 220, 255, 0.70);
+    }
+
+    @media (max-width: 700px) {
+      #entry-panel {
+        width: min(94vw, 700px);
+        padding: 24px 14px 18px;
+      }
+
+      #audio-start {
+        width: min(88vw, 540px);
+        min-height: 106px;
+        padding: 18px 10px 14px;
+      }
+
+      .entry-ornament-ring-a { width: 430px; height: 430px; }
+      .entry-ornament-ring-b { width: 320px; height: 320px; }
+      .entry-ornament-ring-c { width: 230px; height: 230px; }
+
+      .entry-footerline {
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .glitch-main,
+      .glitch-red,
+      .glitch-cyan {
+        line-height: 1.28;
+      }
+    }
+
+
+    /* priestess invite overlay v1 */
+
+    #entry-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at center, rgba(58, 0, 28, 0.18) 0%, rgba(14, 0, 10, 0.62) 42%, rgba(0, 0, 0, 0.90) 100%);
+      overflow: hidden;
+      isolation: isolate;
+      pointer-events: auto;
+    }
+
+    #entry-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 520ms ease;
+    }
+
+    .entry-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at center, transparent 28%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0.58) 100%);
+    }
+
+    .entry-bg-grid {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(255, 0, 80, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(70, 185, 255, 0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 18%, transparent 78%);
+      opacity: 0.34;
+      pointer-events: none;
+      animation: gridFloat 12s linear infinite;
+    }
+
+    @keyframes gridFloat {
+      0%   { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(20px, 14px, 0); }
+    }
+
+    .entry-minimal-panel {
+      width: min(92vw, 860px);
+      padding: 22px 24px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 35, 90, 0.28);
+      background:
+        linear-gradient(180deg, rgba(20, 0, 14, 0.78), rgba(6, 0, 10, 0.88));
+      box-shadow:
+        0 0 24px rgba(255, 0, 76, 0.14),
+        0 0 90px rgba(80, 0, 255, 0.08),
+        inset 0 0 28px rgba(255, 0, 70, 0.06);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .entry-shell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      min-height: 340px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .entry-priestess-wrap {
+      position: relative;
+      width: 240px;
+      height: 320px;
+      flex: 0 0 240px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .entry-priestess-ring {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .entry-priestess-ring.ring-a {
+      width: 210px;
+      height: 210px;
+      border: 1px solid rgba(255, 40, 100, 0.26);
+      box-shadow: 0 0 18px rgba(255, 0, 80, 0.18);
+      animation: priestessHaloSpin 10s linear infinite;
+    }
+
+    .entry-priestess-ring.ring-b {
+      width: 150px;
+      height: 150px;
+      border: 1px dashed rgba(70, 220, 255, 0.34);
+      box-shadow: 0 0 12px rgba(0, 220, 255, 0.16);
+      animation: priestessHaloSpin 6s linear infinite reverse;
+    }
+
+    @keyframes priestessHaloSpin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    #entry-priestess {
+      position: relative;
+      z-index: 3;
+      width: auto;
+      height: 290px;
+      object-fit: contain;
+      filter:
+        hue-rotate(0deg)
+        saturate(1.9)
+        brightness(1.08)
+        drop-shadow(0 0 10px rgba(255, 0, 90, 0.30))
+        drop-shadow(0 0 20px rgba(0, 210, 255, 0.16));
+      animation:
+        priestessHue 7s linear infinite,
+        priestessFloat 3.4s ease-in-out infinite,
+        priestessInvite 2.8s ease-in-out infinite;
+      transform-origin: 50% 88%;
+      pointer-events: none;
+    }
+
+    @keyframes priestessHue {
+      0%   { filter:
+               hue-rotate(0deg)
+               saturate(1.9)
+               brightness(1.08)
+               drop-shadow(0 0 10px rgba(255, 0, 90, 0.30))
+               drop-shadow(0 0 20px rgba(0, 210, 255, 0.16)); }
+      100% { filter:
+               hue-rotate(360deg)
+               saturate(2.25)
+               brightness(1.12)
+               drop-shadow(0 0 12px rgba(255, 0, 90, 0.34))
+               drop-shadow(0 0 22px rgba(0, 210, 255, 0.18)); }
+    }
+
+    @keyframes priestessFloat {
+      0%,100% { transform: translateY(0px); }
+      50%     { transform: translateY(-10px); }
+    }
+
+    @keyframes priestessInvite {
+      0%,100% { rotate: -2deg; }
+      50%     { rotate: 2deg; }
+    }
+
+    .entry-priestess-spark {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,0,90,0.34) 55%, transparent 74%);
+      box-shadow: 0 0 10px rgba(255, 0, 90, 0.42);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .entry-priestess-spark.s1 { left: 28px;  top: 48px;  animation: sparkFloat1 4.2s ease-in-out infinite; }
+    .entry-priestess-spark.s2 { left: 186px; top: 38px;  animation: sparkFloat2 5.1s ease-in-out infinite; }
+    .entry-priestess-spark.s3 { left: 36px;  top: 218px; animation: sparkFloat3 4.8s ease-in-out infinite; }
+    .entry-priestess-spark.s4 { left: 190px; top: 224px; animation: sparkFloat1 5.4s ease-in-out infinite; }
+
+    @keyframes sparkFloat1 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.7); opacity: 0.35; }
+      50%     { transform: translate3d(8px,-14px,0) scale(1.18); opacity: 0.92; }
+    }
+
+    @keyframes sparkFloat2 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.9); opacity: 0.42; }
+      50%     { transform: translate3d(-10px,10px,0) scale(1.08); opacity: 0.86; }
+    }
+
+    @keyframes sparkFloat3 {
+      0%,100% { transform: translate3d(0,0,0) scale(0.8); opacity: 0.38; }
+      50%     { transform: translate3d(12px,14px,0) scale(1.10); opacity: 0.88; }
+    }
+
+    #audio-start {
+      appearance: none;
+      position: relative;
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: min(60vw, 470px);
+      min-height: 122px;
+      padding: 18px 22px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 40, 95, 0.70);
+      background:
+        linear-gradient(180deg, rgba(34, 0, 16, 0.96), rgba(8, 0, 10, 0.99)),
+        radial-gradient(circle at 50% 45%, rgba(255, 0, 76, 0.12), transparent 60%);
+      color: #ffeaf0;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow:
+        0 0 18px rgba(255, 0, 76, 0.18),
+        0 0 52px rgba(80, 0, 255, 0.08),
+        inset 0 0 20px rgba(255, 35, 90, 0.08);
+      transition: transform 140ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    #audio-start:hover,
+    #audio-start:active {
+      transform: translateY(-1px) scale(1.01);
+      border-color: rgba(255, 75, 120, 0.88);
+      box-shadow:
+        0 0 24px rgba(255, 0, 76, 0.28),
+        0 0 64px rgba(0, 210, 255, 0.12),
+        inset 0 0 22px rgba(255, 35, 90, 0.14);
+    }
+
+    #audio-start.playing {
+      border-color: rgba(0, 255, 210, 0.55);
+      box-shadow:
+        0 0 22px rgba(0, 255, 200, 0.20),
+        inset 0 0 22px rgba(0, 255, 200, 0.08);
+    }
+
+    .entry-button-frame,
+    .entry-button-glow,
+    .entry-button-grid {
+      position: absolute;
+      inset: 8px;
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .entry-button-frame {
+      border: 1px solid rgba(255, 70, 118, 0.24);
+      box-shadow: inset 0 0 14px rgba(255, 0, 76, 0.08);
+    }
+
+    .entry-button-glow {
+      background:
+        linear-gradient(90deg, transparent, rgba(255, 0, 70, 0.12), transparent),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.04) 0px,
+          rgba(255,255,255,0.04) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      mix-blend-mode: screen;
+      animation: buttonSweep 2.8s linear infinite;
+      opacity: 0.68;
+    }
+
+    .entry-button-grid {
+      background:
+        linear-gradient(to right, rgba(255, 0, 70, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(70, 190, 255, 0.03) 1px, transparent 1px);
+      background-size: 16px 16px;
+      opacity: 0.32;
+    }
+
+    @keyframes buttonSweep {
+      0%   { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .glitch-wrap {
+      position: relative;
+      display: inline-block;
+      z-index: 3;
+      line-height: 1.18;
+    }
+
+    .glitch-main,
+    .glitch-red,
+    .glitch-cyan {
+      display: block;
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(15px, 2.0vw, 23px);
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .glitch-main {
+      position: relative;
+      z-index: 3;
+      color: #fff2f5;
+      text-shadow:
+        0 0 10px rgba(255, 0, 76, 0.26),
+        0 0 20px rgba(0, 215, 255, 0.08);
+    }
+
+    .glitch-red,
+    .glitch-cyan {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.0;
+    }
+
+    .glitch-red {
+      color: #ff245d;
+      animation: glitchRedStrong 1.5s steps(2, end) infinite;
+    }
+
+    .glitch-cyan {
+      color: #42d7ff;
+      animation: glitchCyanStrong 1.1s steps(2, end) infinite;
+    }
+
+    @keyframes glitchRedStrong {
+      0%, 85%, 100% { transform: translate(0,0); opacity: 0; }
+      86% { transform: translate(-3px, 0); opacity: 0.84; }
+      89% { transform: translate(2px, -1px); opacity: 0.62; }
+      93% { transform: translate(-2px, 1px); opacity: 0.82; }
+      96% { transform: translate(1px, 0); opacity: 0; }
+    }
+
+    @keyframes glitchCyanStrong {
+      0%, 87%, 100% { transform: translate(0,0); opacity: 0; }
+      88% { transform: translate(2px, 0); opacity: 0.72; }
+      91% { transform: translate(-1px, 1px); opacity: 0.86; }
+      95% { transform: translate(3px, -1px); opacity: 0.55; }
+      97% { transform: translate(0,0); opacity: 0; }
+    }
+
+    /* hide all old overlay text if any old markup survives */
+    .entry-topline,
+    .entry-glyph-row,
+    .entry-kicker,
+    .entry-title-stack,
+    .entry-button-sub,
+    .entry-track,
+    .entry-sub,
+    .entry-footerline {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      .entry-shell {
+        flex-direction: column;
+        gap: 16px;
+        min-height: auto;
+      }
+
+      .entry-priestess-wrap {
+        width: 190px;
+        height: 250px;
+        flex: 0 0 auto;
+      }
+
+      #entry-priestess {
+        height: 225px;
+      }
+
+      #audio-start {
+        width: min(86vw, 470px);
+        min-height: 110px;
+        padding: 18px 14px;
+      }
+
+      .glitch-main,
+      .glitch-red,
+      .glitch-cyan {
+        font-size: clamp(13px, 3.1vw, 18px);
+        line-height: 1.32;
+      }
+    }
+
+</style>
+
 
   <script>
-    const ORACLE_URL = 'https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/';
-    const WALL_ART_URLS = [
-      'assets/images/walls/wall_01.jpg', 'assets/images/walls/wall_02.jpg', 'assets/images/walls/wall_03.jpg', 'assets/images/walls/wall_04.jpg',
-      'assets/images/walls/wall_05.jpg', 'assets/images/walls/wall_06.jpg', 'assets/images/walls/wall_07.jpg', 'assets/images/walls/wall_08.jpg',
-      'assets/images/walls/wall_09.jpg', 'assets/images/walls/wall_10.jpg', 'assets/images/walls/wall_11.jpg', 'assets/images/walls/wall_12.jpg'
-    ];
-    let TEMPLE_ENTERED = false;
-    const MODEL_STATE = { total: 5, loaded: 0, failed: 0 };
-
-    function updateModelStatus(extra = '') {
-      const node = document.getElementById('model-status');
-      if (!node) return;
-      const base = `3D models: ${MODEL_STATE.loaded}/${MODEL_STATE.total} loaded${MODEL_STATE.failed ? `, ${MODEL_STATE.failed} failed` : ''}`;
-      node.textContent = extra ? `${base} — ${extra}` : base;
-    }
-
-    AFRAME.registerComponent('fit-model', {
-      schema: { height: { default: 1.8 }, center: { default: true }, floor: { default: true } },
-      init: function () { this.el.addEventListener('model-loaded', () => this.fit()); },
-      fit: function () {
-        window.setTimeout(() => {
-          const mesh = this.el.getObject3D('mesh');
-          if (!mesh) return;
-          const object = this.el.object3D;
-          const parent = object.parent;
-          object.updateMatrixWorld(true);
-          const targetWorld = new THREE.Vector3();
-          object.getWorldPosition(targetWorld);
-          const initialBox = new THREE.Box3().setFromObject(mesh);
-          const initialSize = new THREE.Vector3();
-          initialBox.getSize(initialSize);
-          if (!Number.isFinite(initialSize.y) || initialSize.y <= 0) return;
-          object.scale.multiplyScalar(this.data.height / initialSize.y);
-          object.updateMatrixWorld(true);
-          const fittedBox = new THREE.Box3().setFromObject(mesh);
-          const fittedCenter = new THREE.Vector3();
-          fittedBox.getCenter(fittedCenter);
-          const desiredWorld = targetWorld.clone();
-          if (this.data.center) { desiredWorld.x += targetWorld.x - fittedCenter.x; desiredWorld.z += targetWorld.z - fittedCenter.z; }
-          if (this.data.floor) desiredWorld.y += targetWorld.y - fittedBox.min.y;
-          if (parent) {
-            const currentLocal = parent.worldToLocal(targetWorld.clone());
-            const desiredLocal = parent.worldToLocal(desiredWorld.clone());
-            object.position.add(desiredLocal.sub(currentLocal));
-          } else object.position.add(desiredWorld.sub(targetWorld));
-        }, 0);
+    AFRAME.registerComponent('pulse-opacity', {
+      schema: {
+        min: { default: 0.35 },
+        max: { default: 0.95 },
+        speed: { default: 0.0018 }
+      },
+      tick: function (time) {
+        const t = (Math.sin(time * this.data.speed) + 1) / 2;
+        const opacity = this.data.min + (this.data.max - this.data.min) * t;
+        this.el.setAttribute('material', 'opacity', opacity);
       }
     });
 
-    AFRAME.registerComponent('model-watch', {
-      schema: { name: { default: 'model' }, proxy: { type: 'selector' } },
+    AFRAME.registerComponent('slow-drift', {
+      schema: {
+        amount: { default: 0.04 },
+        speed: { default: 0.001 },
+        axis: { default: 'y' }
+      },
       init: function () {
-        this.el.addEventListener('model-loaded', () => {
-          MODEL_STATE.loaded += 1;
-          if (this.data.proxy) this.data.proxy.setAttribute('visible', 'false');
-          updateModelStatus(`${this.data.name} ready`);
-        });
-        this.el.addEventListener('model-error', (event) => {
-          MODEL_STATE.failed += 1;
-          updateModelStatus(`${this.data.name} failed. Run git lfs pull if all models fail.`);
-          console.warn(`[GEIST] ${this.data.name} model failed`, event.detail || '', this.el.getAttribute('gltf-model'));
-        });
+        this.base = this.el.object3D.position.clone();
+      },
+      tick: function (time) {
+        const offset = Math.sin(time * this.data.speed) * this.data.amount;
+        if (this.data.axis === 'x') this.el.object3D.position.x = this.base.x + offset;
+        if (this.data.axis === 'y') this.el.object3D.position.y = this.base.y + offset;
+        if (this.data.axis === 'z') this.el.object3D.position.z = this.base.z + offset;
       }
     });
 
-    AFRAME.registerComponent('oracle-link', {
-      schema: { url: { type: 'string', default: ORACLE_URL }, label: { type: 'string', default: 'Opening Liber 333 Oracle' } },
-      init: function () {
-        const open = () => {
-          if (!TEMPLE_ENTERED) return;
-          showToast(this.data.label);
-          window.open(this.data.url || ORACLE_URL, '_blank', 'noopener,noreferrer');
-        };
-        this.el.addEventListener('click', open);
-        this.el.addEventListener('mouseenter', () => { if (!TEMPLE_ENTERED) return; this.el.emit('oracle-hover-on'); showToast('Tap Liber 333 to open the oracle'); });
-        this.el.addEventListener('mouseleave', () => this.el.emit('oracle-hover-off'));
+    AFRAME.registerComponent('clamp-player', {
+      schema: {
+        minX: { default: -1.65 },
+        maxX: { default: 1.65 },
+        minZ: { default: -1.35 },
+        maxZ: { default: 1.25 }
+      },
+      tick: function () {
+        const p = this.el.object3D.position;
+        p.x = Math.max(this.data.minX, Math.min(this.data.maxX, p.x));
+        p.z = Math.max(this.data.minZ, Math.min(this.data.maxZ, p.z));
       }
-    });
-
-    AFRAME.registerComponent('slow-float', {
-      schema: { amount: { default: 0.035 }, speed: { default: 0.0014 } },
-      init: function () { this.baseY = this.el.object3D.position.y; },
-      tick: function (time) { this.el.object3D.position.y = this.baseY + Math.sin(time * this.data.speed) * this.data.amount; }
-    });
-
-    function showToast(message) {
-      const toast = document.getElementById('oracle-toast');
-      if (!toast) return;
-      toast.textContent = message;
-      toast.classList.add('visible');
-      window.clearTimeout(showToast.timer);
-      showToast.timer = window.setTimeout(() => toast.classList.remove('visible'), 1600);
-    }
-
-    function applyOptionalWallArt() {
-      document.querySelectorAll('.wall-panel').forEach((panel, index) => {
-        const url = WALL_ART_URLS[index % WALL_ART_URLS.length];
-        const probe = new Image();
-        probe.onload = () => panel.setAttribute('src', url);
-        probe.onerror = () => panel.setAttribute('src', '#backdrop-img');
-        probe.src = url;
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const overlay = document.getElementById('entry-overlay');
-      const button = document.getElementById('enter-button');
-      const status = document.getElementById('status-line');
-      const bar = document.getElementById('load-bar');
-      const assets = document.querySelector('a-assets');
-      let ready = false;
-      let progress = 8;
-      updateModelStatus('streaming after entry');
-      applyOptionalWallArt();
-      const setProgress = (value) => { progress = Math.max(progress, Math.min(value, 100)); if (bar) bar.style.width = `${progress}%`; };
-      const fakeLoad = window.setInterval(() => { if (!ready) setProgress(Math.min(88, progress + Math.random() * 6 + 2)); }, 260);
-      const markReady = () => {
-        if (ready) return;
-        ready = true;
-        window.clearInterval(fakeLoad);
-        setProgress(100);
-        if (status) status.textContent = 'Room sealed. 3D models stream in place.';
-        if (button) { button.disabled = false; button.classList.add('ready'); button.textContent = 'Enter Temple'; }
-      };
-      if (assets && assets.hasLoaded) markReady();
-      else if (assets) assets.addEventListener('loaded', markReady);
-      else window.setTimeout(markReady, 900);
-      window.setTimeout(markReady, 5000);
-      button?.addEventListener('click', () => {
-        if (!ready) return;
-        TEMPLE_ENTERED = true;
-        overlay?.classList.add('hidden');
-        window.setTimeout(() => overlay?.remove(), 520);
-        showToast('Temple entered. Tap Liber 333 when ready.');
-      });
     });
   </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+
+<script>
+AFRAME.registerComponent("liber-333-link", {
+  init: function () {
+    this.el.addEventListener("click", () => {
+      window.open(
+        "https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/",
+        "_blank",
+        "noopener"
+      );
+    });
+  }
+});
+</script>
+
 </head>
 
-<body>
-  <div id="entry-overlay">
-    <section id="entry-panel" aria-label="Enter GEIST Arcade">
-      <p class="entry-kicker">GEIST ARCADE / COMPACT ROOM V1</p>
-      <h1 class="entry-title">Liber 333<br />Oracle Cabinet</h1>
-      <p class="entry-sub">A compact occult arcade chamber. The central cabinet opens the Liber 333 oracle in a full browser page.</p>
-      <div id="load-track"><div id="load-bar"></div></div>
-      <button id="enter-button" disabled>Rendering Room</button>
-      <div id="status-line">Loading ritual floor and wall art...</div>
-    </section>
-  </div>
-  <div id="oracle-toast">Tap Liber 333 to open the oracle</div>
-  <div id="model-status">3D models: pending</div>
 
-  <a-scene renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false" background="color: #020004" fog="type: exponential; color: #030006; density: 0.04" xr-mode-ui="enabled: true" webxr="optionalFeatures: local-floor, bounded-floor">
-    <a-assets timeout="6000">
-      <img id="floor-pattern" src="assets/images/floor_led_pattern.png" crossorigin="anonymous" />
-      <img id="backdrop-img" src="assets/images/newarcadebackdrop.jpg" crossorigin="anonymous" />
-      <img id="sigil-marker" src="assets/images/unicursal_bolt_red_alpha.png" crossorigin="anonymous" />
+<body>
+  
+  
+  
+  <div id="entry-overlay">
+    <div class="entry-bg-grid"></div>
+    <div class="entry-vignette"></div>
+
+    <div id="entry-panel" class="entry-minimal-panel">
+      <div class="entry-shell">
+        <div class="entry-priestess-wrap" aria-hidden="true">
+          <div class="entry-priestess-ring ring-a"></div>
+          <div class="entry-priestess-ring ring-b"></div>
+          <div class="entry-priestess-spark s1"></div>
+          <div class="entry-priestess-spark s2"></div>
+          <div class="entry-priestess-spark s3"></div>
+          <div class="entry-priestess-spark s4"></div>
+          <img id="entry-priestess" src="assets/images/character.png" alt="">
+        </div>
+
+        <button id="audio-start" type="button" aria-label="Enter Liber Nox Arcade">
+          <span class="entry-button-frame"></span>
+          <span class="entry-button-glow"></span>
+          <span class="entry-button-grid"></span>
+
+          <span class="glitch-wrap">
+            <span class="glitch-main">Enter Liber Nox Arcade</span>
+            <span class="glitch-red">Enter Liber Nox Arcade</span>
+            <span class="glitch-cyan">Enter Liber Nox Arcade</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+<audio id="arcade-theme-audio" preload="auto" loop playsinline></audio>
+  
+  <div id="notice">
+    GEIST Temple Arcade — Liber Nox oracle shrine. Priestesses guard the central cabinet.
+  </div>
+
+  <a-scene
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false"
+    background="color: #020006"
+    fog="type: exponential; color: #040007; density: 0.032"
+    xr-mode-ui="enabled: true"
+  >
+    <a-assets>
+      <img id="unicursal-bolt" src="assets/images/unicursal_bolt_red_alpha.png">
+      <img id="background-clean" src="assets/images/newarcadebackdrop.jpg">
+      <img id="reference-full" src="assets/images/walls/wall_01.jpg">
+      <img id="character-img" src="assets/images/character.png">
+      <img id="sigil-custom-img" src="assets/images/sigil_custom.png">
+          
+          <a-asset-item id="cabinet-02-glb" src="assets/models/cabinets/cabinet_02.glb"></a-asset-item>
+          <a-asset-item id="cabinet-06-glb" src="assets/models/cabinets/cabinet_06.glb"></a-asset-item>
+          <a-asset-item id="liber-nox-glb" src="assets/models/cabinets/liber_nox.glb"></a-asset-item>
+          <img id="floor-led-pattern-img" src="assets/images/floor_led_pattern.png">
+          <a-asset-item id="character-glb" src="assets/models/character.glb"></a-asset-item>
+          <a-asset-item id="priestess-02-glb" src="assets/models/priestess_02.glb"></a-asset-item>
     </a-assets>
 
-    <a-sky color="#020004"></a-sky>
-
-    <a-entity id="lighting">
-      <a-entity light="type: ambient; color: #3b1525; intensity: 1.12"></a-entity>
-      <a-entity light="type: hemisphere; color: #4d1830; groundColor: #050006; intensity: 0.65"></a-entity>
-      <a-entity light="type: point; color: #ff174f; intensity: 2.65; distance: 5.5; decay: 1.25" position="0 2.45 -2.35"></a-entity>
-      <a-entity light="type: point; color: #6bdcff; intensity: 1.05; distance: 4.5; decay: 1.45" position="-2.15 1.8 -1.45"></a-entity>
-      <a-entity light="type: point; color: #ffb36b; intensity: 1.1; distance: 4.5; decay: 1.45" position="2.15 1.8 -1.45"></a-entity>
+    <!-- PLAYER: average standing viewer, eye height around 1.6m -->
+    <a-entity
+      id="player"
+      position="0 1.6 2.25"
+      clamp-player="minX: -4.8; maxX: 4.8; minZ: -12.6; maxZ: 2.35"
+    >
+      <a-entity
+        camera
+        look-controls="touchEnabled: true; mouseEnabled: true"
+        wasd-controls="acceleration: 26; fly: false"
+      ></a-entity>
     </a-entity>
 
-    <a-entity id="environment">
-      <a-plane id="dark-base-floor" position="0 -0.012 0" rotation="-90 0 0" width="9" height="9" material="color: #050006; roughness: 0.92; metalness: 0.02"></a-plane>
-      <a-circle id="ritual-pattern-floor" position="0 0.004 0" rotation="-90 0 0" radius="3.75" segments="96" material="src: #floor-pattern; repeat: 3 3; shader: flat; transparent: true; opacity: 0.88; side: double"></a-circle>
-      <a-ring id="outer-floor-boundary" position="0 0.012 0" rotation="-90 0 0" radius-inner="3.70" radius-outer="3.77" segments-theta="128" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.36; side: double"></a-ring>
+    <!-- DARK SKY: do not put the painting here later; this remains abstract/cosmic -->
+    <a-sky color="#010004"></a-sky>
 
-      <a-entity id="backdrop-panels">
-        <a-image class="wall-panel" src="#backdrop-img" position="-3.05 1.75 -2.35" rotation="0 58 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.27; side: double"></a-image>
-        <a-image class="wall-panel" src="#backdrop-img" position="-2.40 1.75 -3.02" rotation="0 42 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.29; side: double"></a-image>
-        <a-image class="wall-panel" src="#backdrop-img" position="-1.55 1.75 -3.45" rotation="0 24 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.30; side: double"></a-image>
-        <a-image class="wall-panel" src="#backdrop-img" position="-0.55 1.75 -3.68" rotation="0 8 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.31; side: double"></a-image>
-        <a-image class="wall-panel" src="#backdrop-img" position="0.55 1.75 -3.68" rotation="0 -8 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.31; side: double"></a-image>
-        <a-image class="wall-panel" src="#backdrop-img" position="1.55 1.75 -3.45" rotation="0 -24 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.30; side: double"></a-image>
-        <a-image class="wall-panel" src="#backdrop-img" position="2.40 1.75 -3.02" rotation="0 -42 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.29; side: double"></a-image>
-        <a-image class="wall-panel" src="#backdrop-img" position="3.05 1.75 -2.35" rotation="0 -58 0" width="1.55" height="2.60" material="shader: flat; transparent: true; opacity: 0.27; side: double"></a-image>
+    <!-- MINIMAL LIGHTING: most glow is faked with flat/emissive-looking materials -->
+    <a-entity light="type: ambient; color: #2a0b1a; intensity: 0.7"></a-entity>
+    <a-entity light="type: point; color: #ff0038; intensity: 1.25; distance: 5.8" position="1.78 2.25 -3.45"></a-entity>
+    <a-entity light="type: point; color: #3388ff; intensity: 0.58; distance: 3.8" position="-1.48 1.55 -2.45"></a-entity>
+
+    <!-- FLOOR / STAGE -->
+    <a-plane
+      id="stage-floor"
+      position="0 0 -5.2"
+      rotation="-90 0 0"
+      width="11.5"
+      height="16.5"
+      material="src: #floor-led-pattern-img; repeat: 8 12; color: #ffffff; roughness: 0.72; metalness: 0.08"
+    ></a-plane>
+
+    <!-- FOREGROUND TABLE/FLOOR ZONE: this approximates the source image's neon surface -->
+    <a-plane
+      id="foreground-surface"
+      position="-0.7 0.018 -0.72"
+      rotation="-90 0 0"
+      width="3.05"
+      height="1.55"
+      material="shader: flat; color: #10103a; opacity: 0.72; transparent: true"
+    ></a-plane>
+
+    <!-- BACKDROP: big flat plane now; later this receives background_clean.jpg -->
+    <a-image
+      id="reference-backplate"
+      src="#background-clean"
+      position="0 2.12 -4.55"
+      width="4.8"
+      height="4.8"
+      material="shader: flat; transparent: true; opacity: 0.45; side: double"
+    ></a-image>
+
+    <!-- ARCADE CABINET TEMPLE LAYOUT: four left, four right, Liber Nox as central oracle altar -->
+    <a-entity id="cabinet-temple-layout">
+      <!-- LEFT ROW: faces inward toward the aisle -->
+      
+      
+      
+      <!-- LIBER SHRINE FRAME -->
+      <a-entity id="liber-shrine-frame" position="0 0 -3.18">
+        <a-box position="-0.78 1.28 0" width="0.035" height="2.2" depth="0.035" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.62"></a-box>
+        <a-box position="0.78 1.28 0" width="0.035" height="2.2" depth="0.035" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.62"></a-box>
+        <a-box position="0 2.36 0" width="1.62" height="0.035" depth="0.035" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.55"></a-box>
+        <a-ring position="0 2.42 0.01" radius-inner="0.12" radius-outer="0.15" segments-theta="7" material="shader: flat; color: #ff4b7f; transparent: true; opacity: 0.72; side: double" animation="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 14000; easing: linear"></a-ring>
+      </a-entity>
+      <!-- /LIBER SHRINE FRAME -->
+
+<!-- BABALON STAR HALO -->
+      <a-entity id="babalon-star-halo" position="0 2.18 -3.42" rotation="0 0 0">
+        <a-ring
+          radius-inner="0.58"
+          radius-outer="0.62"
+          segments-theta="96"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.34; side: double"
+          animation="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 24000; easing: linear">
+        </a-ring>
+
+        <a-ring
+          radius-inner="0.36"
+          radius-outer="0.39"
+          segments-theta="7"
+          material="shader: flat; color: #ff4b7f; transparent: true; opacity: 0.50; side: double"
+          animation="property: rotation; from: 0 0 0; to: 0 0 -360; loop: true; dur: 18000; easing: linear">
+        </a-ring>
+
+        <a-image
+          src="#sigil-custom-img"
+          width="1.28"
+          height="1.28"
+          material="shader: flat; transparent: true; opacity: 0.50; side: double"
+          animation="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 36000; easing: linear">
+        </a-image>
+
+        <a-light
+          type="point"
+          color="#ff0038"
+          intensity="0.85"
+          distance="3.2"
+          decay="1.8">
+        </a-light>
+      </a-entity>
+      <!-- /BABALON STAR HALO -->
+
+
+      <!-- PRIESTESS ALCOVE LIGHTS -->
+      <a-entity id="priestess-alcove-lights">
+        <a-light type="point" color="#4211ff" intensity="0.85" distance="2.4" decay="1.6" position="-2.85 1.05 -2.15"></a-light>
+        <a-light type="point" color="#ff0038" intensity="1.05" distance="2.6" decay="1.6" position="2.85 1.05 -2.15"></a-light>
+        <a-light type="point" color="#ff336f" intensity="1.25" distance="2.2" decay="1.7" position="-1.05 0.95 -2.10"></a-light>
+        <a-light type="point" color="#ff174f" intensity="1.25" distance="2.2" decay="1.7" position="1.05 0.95 -2.10"></a-light>
+      </a-entity>
+      <!-- /PRIESTESS ALCOVE LIGHTS -->
+
+<!-- COMPACT LIBER TEMPLE -->
+
+      <a-gltf-model
+        id="cabinet-left"
+        src="#cabinet-02-glb"
+        position="-2.35 0 -2.65"
+        rotation="0 20 0"
+        fit-model="height: 1.72">
+      </a-gltf-model>
+
+      <a-gltf-model
+        id="liber-nox-cabinet"
+        src="#liber-nox-glb"
+        position="0 0 -2.85"
+        rotation="0 0 0"
+        fit-model="height: 2.02">
+      </a-gltf-model>
+
+      <a-gltf-model
+        id="cabinet-right"
+        src="#cabinet-06-glb"
+        position="2.35 0 -2.65"
+        rotation="0 -20 0"
+        fit-model="height: 1.72">
+      </a-gltf-model>
+
+      <!-- LEFT PRIESTESS -->
+      <a-gltf-model
+        id="priestess-left"
+        src="#priestess-02-glb"
+        position="-1.15 0 -2.35"
+        rotation="0 18 0"
+        fit-model="height: 1.58">
+      </a-gltf-model>
+
+      <!-- RIGHT PRIESTESS -->
+      <a-gltf-model
+        id="priestess-right"
+        src="#character-glb"
+        position="1.15 0 -2.35"
+        rotation="0 -18 0"
+        fit-model="height: 1.58">
+      </a-gltf-model>
+
+
+      <!-- LIBER NOX: central future oracle / future Liber 333 portal hook -->
+      <a-entity
+        id="liber-nox-oracle-shrine"
+        position="0 0 -11.15"
+        animation__float="property: position; from: 0 0 -11.15; to: 0 0.10 -11.15; dir: alternate; loop: true; dur: 2600; easing: easeInOutSine"
+      >
+        
+
+
+        <!-- Future hook: openLiber333Oracle() should activate this central cabinet as a Liber 333 oracle terminal. -->
+        <a-entity light="type: point; color: #ff0038; intensity: 3.0; distance: 6.2; decay: 1.35" position="0 1.65 0.25"></a-entity>
+        <a-entity light="type: point; color: #7a2cff; intensity: 2.15; distance: 5.2; decay: 1.4" position="-0.75 1.25 0.55"></a-entity>
+        <a-entity light="type: point; color: #ffcc66; intensity: 1.35; distance: 3.5; decay: 1.6" position="0.75 1.05 0.55"></a-entity>
+
+        <a-ring
+          id="liber-nox-floor-aura"
+          position="0 0.035 0"
+          rotation="-90 0 0"
+          radius-inner="1.15"
+          radius-outer="1.95"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.28; side: double"
+          animation__pulse="property: scale; from: 1 1 1; to: 1.18 1.18 1.18; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
+        ></a-ring>
+
+        <a-ring
+          id="liber-nox-portal-halo"
+          position="0 1.95 0.12"
+          rotation="0 0 0"
+          radius-inner="0.72"
+          radius-outer="0.86"
+          material="shader: flat; color: #9d35ff; transparent: true; opacity: 0.44; side: double"
+          animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 9000; easing: linear"
+        ></a-ring>
+
+        <a-text
+          id="liber-nox-oracle-label"
+          value="LIBER NOX // LIBER 333 ORACLE"
+          position="0 2.85 0.05"
+          rotation="0 0 0"
+          align="center"
+          width="4.6"
+          color="#ffb3c7"
+          material="shader: flat; transparent: true; opacity: 0.92"
+        ></a-text>
       </a-entity>
     </a-entity>
 
-    <a-entity id="arcade-room-layout">
-      <a-entity id="left-cabinet-proxy" position="-1.85 0 -2.30" rotation="0 20 0">
-        <a-box position="0 0.9 0" width="0.86" height="1.8" depth="0.58" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
-        <a-plane position="0 1.28 0.305" width="0.62" height="0.40" material="shader: flat; color: #65dfff; transparent: true; opacity: 0.22"></a-plane>
-      </a-entity>
+    <a-entity
+      id="custom-neon-sigil"
+      position="1.78 2.30 -3.20"
+      rotation="0 -8 0"
+      animation__spin="property: rotation; from: 0 -8 0; to: 0 352 0; loop: true; dur: 26000; easing: linear"
+      animation__pulse="property: scale; from: 1 1 1; to: 1.05 1.05 1.05; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+    >
+      <!-- glow layer -->
+      <a-image
+        id="custom-neon-sigil-glow"
+        src="#sigil-custom-img"
+        position="0 0 0"
+        width="2.25"
+        height="2.25"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.22; side: double"
+      ></a-image>
 
-      <a-entity id="liber-333-proxy" position="0 0 -2.58">
-        <a-box position="0 1.05 0" width="1.02" height="2.1" depth="0.66" material="color: #090009; metalness: 0.35; roughness: 0.55"></a-box>
-        <a-box position="0 2.18 0.03" width="1.20" height="0.32" depth="0.72" material="shader: flat; color: #17000b"></a-box>
-        <a-plane position="0 1.42 0.345" width="0.82" height="0.50" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.18"></a-plane>
-        <a-text value="LIBER 333" position="0 1.45 0.36" align="center" color="#ffe6ed" width="2.3" material="shader: flat"></a-text>
-        <a-text value="TAP TO OPEN" position="0 1.30 0.36" align="center" color="#ff6a93" width="1.7" material="shader: flat"></a-text>
-      </a-entity>
+      <!-- crisp main layer -->
+      <a-image
+        id="custom-neon-sigil-core"
+        src="#sigil-custom-img"
+        position="0 0 0.01"
+        width="1.95"
+        height="1.95"
+        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double"
+      ></a-image>
+    </a-entity>
 
-      <a-entity id="right-cabinet-proxy" position="1.85 0 -2.30" rotation="0 -20 0">
-        <a-box position="0 0.9 0" width="0.86" height="1.8" depth="0.58" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
-        <a-plane position="0 1.28 0.305" width="0.62" height="0.40" material="shader: flat; color: #ffb36b; transparent: true; opacity: 0.22"></a-plane>
-      </a-entity>
+    <a-entity id="character-light-rig">
+      <!-- soft front fill so the 3D character is not a black silhouette -->
+      <a-entity
+        light="type: point; color: #ffd0c8; intensity: 2.2; distance: 4.0; decay: 1.4"
+        position="0.25 2.15 0.15"
+      ></a-entity>
 
-      <a-entity id="left-priestess-proxy" position="-0.92 0 -2.42" rotation="0 18 0">
-        <a-cylinder position="0 0.78 0" radius="0.13" height="1.36" material="color: #190010; transparent: true; opacity: 0.72"></a-cylinder>
-        <a-sphere position="0 1.52 0" radius="0.14" material="color: #ffb3c8; transparent: true; opacity: 0.72"></a-sphere>
-        <a-ring position="0 1.62 0.01" radius-inner="0.20" radius-outer="0.235" material="shader: flat; color: #65dfff; transparent: true; opacity: 0.58"></a-ring>
-      </a-entity>
+      <!-- cool arcade-blue rim light -->
+      <a-entity
+        light="type: point; color: #4f8cff; intensity: 1.15; distance: 3.5; decay: 1.6"
+        position="-1.25 1.75 -1.20"
+      ></a-entity>
 
-      <a-entity id="right-priestess-proxy" position="0.92 0 -2.42" rotation="0 -18 0">
-        <a-cylinder position="0 0.78 0" radius="0.13" height="1.36" material="color: #190010; transparent: true; opacity: 0.72"></a-cylinder>
-        <a-sphere position="0 1.52 0" radius="0.14" material="color: #ffb3c8; transparent: true; opacity: 0.72"></a-sphere>
-        <a-ring position="0 1.62 0.01" radius-inner="0.20" radius-outer="0.235" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.64"></a-ring>
-      </a-entity>
+      <!-- red sigil/back glow -->
+      <a-entity
+        light="type: point; color: #ff1a44; intensity: 1.45; distance: 4.2; decay: 1.5"
+        position="1.75 2.05 -2.85"
+      ></a-entity>
+    </a-entity>
 
-      <a-entity id="secondary-cabinet-left" gltf-model="url(assets/models/cabinets/cabinet_02.glb)" position="-1.85 0 -2.30" rotation="0 20 0" fit-model="height: 1.72; center: true; floor: true" model-watch="name: left cabinet; proxy: #left-cabinet-proxy"></a-entity>
-      <a-entity id="liber-333-cabinet" gltf-model="url(assets/models/cabinets/liber_nox.glb)" position="0 0 -2.58" rotation="0 0 0" fit-model="height: 2.02; center: true; floor: true" model-watch="name: Liber 333; proxy: #liber-333-proxy"></a-entity>
-      <a-entity id="secondary-cabinet-right" gltf-model="url(assets/models/cabinets/cabinet_06.glb)" position="1.85 0 -2.30" rotation="0 -20 0" fit-model="height: 1.72; center: true; floor: true" model-watch="name: right cabinet; proxy: #right-cabinet-proxy"></a-entity>
-      <a-entity id="left-priestess-figure" gltf-model="url(assets/models/character.glb)" position="-0.92 0 -2.42" rotation="0 18 0" fit-model="height: 1.58; center: true; floor: true" model-watch="name: left priestess; proxy: #left-priestess-proxy"></a-entity>
-      <a-entity id="right-priestess-figure" gltf-model="url(assets/models/character.glb)" position="0.92 0 -2.42" rotation="0 -18 0" fit-model="height: 1.58; center: true; floor: true" model-watch="name: right priestess; proxy: #right-priestess-proxy"></a-entity>
+    
 
-      <a-entity id="oracle-attract-screen" position="0 1.36 -2.19" rotation="0 0 0" slow-float="amount: 0.014; speed: 0.0017">
-        <a-plane width="0.92" height="0.52" material="shader: flat; color: #09000b; transparent: true; opacity: 0.86"></a-plane>
-        <a-plane position="0 0 0.006" width="0.84" height="0.44" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.08" animation="property: material.opacity; from: 0.05; to: 0.15; dur: 1500; dir: alternate; loop: true; easing: easeInOutSine"></a-plane>
-        <a-text value="LIBER 333" position="0 0.10 0.012" align="center" color="#ffe6ed" width="2.2" material="shader: flat"></a-text>
-        <a-text value="TAP TO OPEN" position="0 -0.07 0.012" align="center" color="#ff5d86" width="1.8" material="shader: flat"></a-text>
-      </a-entity>
+    <a-image
+      id="character-cutout" visible="false"
+      src="#character-img"
+      position="0.38 1.42 -2.08"
+      rotation="0 -3 0"
+      width="1.48"
+      height="2.96"
+      material="shader: flat; transparent: true; alphaTest: 0.01; side: double"
+    ></a-image>
 
-      <a-box id="liber-333-hitbox" class="clickable" position="0 1.12 -2.18" width="1.35" height="2.05" depth="0.66" material="color: #ff0038; transparent: true; opacity: 0.001; depthWrite: false" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle" animation__hoveron="property: scale; startEvents: oracle-hover-on; to: 1.018 1.018 1.018; dur: 120; easing: easeOutQuad" animation__hoveroff="property: scale; startEvents: oracle-hover-off; to: 1 1 1; dur: 180; easing: easeOutQuad"></a-box>
+    <!-- WRAP PANELS: theatrical set walls, not a literal room -->
+    <a-plane
+      id="backdrop-left"
+      position="-3.68 2.05 -3.05"
+      rotation="0 34 0"
+      width="3.4"
+      height="4.5"
+      material="shader: flat; color: #03040d; opacity: 1"
+    ></a-plane>
 
-      <a-entity id="liber-333-floor-marker" position="0 0.034 -1.72" class="clickable" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle">
-        <a-circle rotation="-90 0 0" radius="0.43" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.052; side: double" animation="property: material.opacity; from: 0.030; to: 0.085; dur: 1200; dir: alternate; loop: true; easing: easeInOutSine"></a-circle>
-        <a-image src="#sigil-marker" position="0 0.006 0" rotation="-90 0 0" width="0.58" height="0.58" material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double" animation="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 18000; easing: linear"></a-image>
+    <a-plane
+      id="backdrop-right"
+      position="3.72 2.05 -3.05"
+      rotation="0 -34 0"
+      width="3.4"
+      height="4.5"
+      material="shader: flat; color: #03040d; opacity: 1"
+    ></a-plane>
+
+    <!-- STARFIELD / RED MOTES -->
+    <a-entity id="stars">
+      <a-sphere position="-3.0 3.1 -4.08" radius="0.014" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-2.45 2.48 -3.7" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="-2.05 3.28 -4.18" radius="0.014" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-1.52 2.83 -3.92" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="-1.04 3.36 -4.05" radius="0.016" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="-0.5 2.62 -3.85" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="0.05 3.13 -4.1" radius="0.011" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="0.62 2.72 -3.75" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="1.18 3.26 -4.08" radius="0.017" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="1.73 2.58 -3.72" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="2.32 3.12 -4.07" radius="0.015" color="#ff2944" material="shader: flat"></a-sphere>
+      <a-sphere position="2.82 2.55 -3.78" radius="0.008" color="#ffffff" material="shader: flat"></a-sphere>
+      <a-sphere position="3.08 3.32 -4.2" radius="0.013" color="#ff2944" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- ARCADE CABINET: more like v1, slightly uncanny, left-side anchor -->
+    
+
+    <!-- CHARACTER PLACEHOLDER: human-scale marker, deliberately subdued until PNG replacement -->
+    <!-- character-placeholder hidden during reference calibration -->
+<!-- BACK SIGIL: larger, more dominant, behind/right of figure -->
+    <!-- back-sigil placeholder hidden during reference calibration -->
+<a-entity line="start: 0.68 -0.39 0.02; end: 0 0.76 0.02; color: #ff0038"></a-entity>
+      <a-entity line="start: 0 0.76 0.02; end: -0.68 -0.39 0.02; color: #ff0038"></a-entity>
+
+      <a-entity line="start: -0.48 0.36 0.025; end: 0.48 0.36 0.025; color: #ff0038"></a-entity>
+      <a-entity line="start: 0.48 0.36 0.025; end: 0 -0.62 0.025; color: #ff0038"></a-entity>
+      <a-entity line="start: 0 -0.62 0.025; end: -0.48 0.36 0.025; color: #ff0038"></a-entity>
+
+      <!-- small drop node -->
+      <a-cylinder position="0 -1.03 0.04" radius="0.012" height="0.36" color="#ff0038" material="shader: flat"></a-cylinder>
+      <a-sphere position="0 -1.22 0.04" radius="0.045" color="#ff0038" material="shader: flat"></a-sphere>
+    </a-entity>
+
+    <!-- FLOOR SIGIL: foreground anchor -->
+    
+
+    <!-- RIGHT-SIDE HANGING LIGHT STRANDS -->
+    <!-- hanging-lights placeholder hidden during reference calibration -->
+<!-- WALKABLE BOUNDARY: visible for development, later make invisible -->
+    <a-box position="0 0.035 1.25" width="4.2" height="0.05" depth="0.04" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="-2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="2.1 0.035 -0.55" width="0.04" height="0.05" depth="3.6" material="shader: flat; color: #450016; opacity: 0.24; transparent: true"></a-box>
+    <a-box position="0 0.035 -2.35" width="4.2" height="0.05" depth="0.04" material="shader: flat; color: #450016; opacity: 0.18; transparent: true"></a-box>
+  <a-entity id="led-floor-group">
+      <!-- main tiled LED pattern -->
+      <a-plane
+        id="led-floor-pattern"
+        position="0 0.021 -1.30"
+        rotation="-90 0 0"
+        width="4.2"
+        height="4.2"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.92; side: double"
+      ></a-plane>
+
+      <!-- soft fake glow pass -->
+      <a-plane
+        id="led-floor-glow"
+        position="0 0.018 -1.30"
+        rotation="-90 0 0"
+        width="4.35"
+        height="4.35"
+        material="src: #floor-led-pattern-img; shader: flat; repeat: 4 4; transparent: false; opacity: 0.18; side: double"
+        animation__pulse="property: material.opacity; from: 0.10; to: 0.24; dir: alternate; dur: 1800; easing: easeInOutSine; loop: true"
+      ></a-plane>
+    </a-entity>
+
+    <!-- FLOOR HOLOGRAM SCREEN / RECESSED WELL -->
+    
+
+
+
+<!-- outer hypercube-ish frame -->
+      
+
+
+      <!-- inner hypercube-ish frame -->
+      
+
+
+      <!-- soft glow halo -->
+      
+
+    </a-entity>
+
+
+  
+    <!-- FLOOR SCREEN: flat under-glass shifting geometry inside the existing red ring -->
+    
+
+
+
+  
+    <!-- centered floor hologram cluster inside existing ring -->
+    
+
+
+  
+    <!-- three floor projector circles -->
+
+    
+
+
+    
+
+
+    
+
+
+  
+    <!-- five small symmetric floor projectors -->
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+  
+    <!-- five equal floor projectors in pentagram-style arrangement under the girl -->
+
+    <a-entity id="projector-a" position="0.62 0.036 -1.82">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 7600; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
       </a-entity>
     </a-entity>
 
-    <a-entity id="player-rig" position="0 0 0.55">
-      <a-entity id="camera" camera position="0 1.6 0" look-controls="touchEnabled: true; mouseEnabled: true; pointerLockEnabled: false" wasd-controls="acceleration: 14; fly: false">
-        <a-entity id="gaze-cursor" position="0 0 -1" cursor="fuse: false" raycaster="objects: .clickable; far: 7; interval: 80" geometry="primitive: ring; radiusInner: 0.006; radiusOuter: 0.011; segmentsTheta: 32" material="shader: flat; color: #ffffff; opacity: 0.9" animation__click="property: scale; startEvents: click; from: 0.55 0.55 0.55; to: 1 1 1; dur: 160; easing: easeOutQuad"></a-entity>
+    <a-entity id="projector-b" position="0.95 0.036 -1.56">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 360; to: 0 0 0; loop: true; dur: 6400; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
       </a-entity>
-      <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .clickable; far: 7; interval: 80" line="color: #ff0038; opacity: 0.55"></a-entity>
-      <a-entity id="left-controller" laser-controls="hand: left" raycaster="objects: .clickable; far: 7; interval: 80" line="color: #65dfff; opacity: 0.32"></a-entity>
     </a-entity>
-  </a-scene>
+
+    <a-entity id="projector-c" position="0.82 0.036 -1.18">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 7000; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="projector-d" position="0.42 0.036 -1.18">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 360; to: 0 0 0; loop: true; dur: 6700; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+    <a-entity id="projector-e" position="0.29 0.036 -1.56">
+      <!-- outer neon ring -->
+      <a-ring
+        position="0 0 0"
+        rotation="-90 0 0"
+        radius-inner="0.148"
+        radius-outer="0.172"
+        material="shader: flat; color: #ff1f66; opacity: 0.90; transparent: true; side: double"
+        animation__pulse="property: material.opacity; from: 0.55; to: 0.95; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- dark screen -->
+      <a-circle
+        position="0 0.002 0"
+        rotation="-90 0 0"
+        radius="0.136"
+        material="shader: flat; color: #180022; opacity: 0.88; transparent: true; side: double"
+      ></a-circle>
+
+      <!-- inner glass glow -->
+      <a-circle
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        radius="0.118"
+        material="shader: flat; color: #6a6dff; opacity: 0.08; transparent: true; side: double"
+        animation__glow="property: material.opacity; from: 0.04; to: 0.14; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
+      ></a-circle>
+
+      <!-- central scan ring -->
+      <a-ring
+        position="0 0.006 0"
+        rotation="-90 0 0"
+        radius-inner="0.020"
+        radius-outer="0.032"
+        material="shader: flat; color: #7ff2ff; opacity: 0.72; transparent: true; side: double"
+        animation__scan="property: scale; from: 0.8 0.8 0.8; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1100; easing: easeInOutSine"
+      ></a-ring>
+
+      <!-- hologram cluster -->
+      <a-entity
+        position="0 0.010 0"
+        rotation="-90 0 0"
+        animation__spin="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 7300; easing: linear"
+      >
+        <!-- center cube -->
+        <a-entity line="start: -0.024 -0.024 0; end: 0.024 -0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 -0.024 0; end: 0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: 0.024 0.024 0; end: -0.024 0.024 0; color: #ff7af1"></a-entity>
+        <a-entity line="start: -0.024 0.024 0; end: -0.024 -0.024 0; color: #ff7af1"></a-entity>
+
+        <!-- four smaller orbiting cubes -->
+        <a-entity position="-0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0.060 0 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 -0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <a-entity position="0 0.060 0" scale="0.75 0.75 0.75">
+          <a-entity line="start: -0.016 -0.016 0; end: 0.016 -0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 -0.016 0; end: 0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: 0.016 0.016 0; end: -0.016 0.016 0; color: #8de7ff"></a-entity>
+          <a-entity line="start: -0.016 0.016 0; end: -0.016 -0.016 0; color: #8de7ff"></a-entity>
+        </a-entity>
+
+        <!-- sparkle dots -->
+        <a-circle position="-0.082 0.030 0" radius="0.0038" material="shader: flat; color: #ffffff; opacity: 0.80; transparent: true"
+          animation__s1="property: scale; from: 0.5 0.5 0.5; to: 1.8 1.8 1.8; dir: alternate; loop: true; dur: 900"></a-circle>
+
+        <a-circle position="0.078 -0.034 0" radius="0.0038" material="shader: flat; color: #6fe8ff; opacity: 0.76; transparent: true"
+          animation__s2="property: scale; from: 0.5 0.5 0.5; to: 1.9 1.9 1.9; dir: alternate; loop: true; dur: 700"></a-circle>
+
+        <a-circle position="0.034 0.082 0" radius="0.0038" material="shader: flat; color: #ff7af1; opacity: 0.76; transparent: true"
+          animation__s3="property: scale; from: 0.5 0.5 0.5; to: 1.7 1.7 1.7; dir: alternate; loop: true; dur: 1050"></a-circle>
+      </a-entity>
+    </a-entity>
+
+  
+    <!-- Left floor portal: dark screen + red lightning unicursal-hexagram-style sigil -->
+    <a-entity
+      id="left-floor-lightning-portal"
+      position="-1.01 0.039 -0.86"
+      rotation="-90 0 0"
+      left-portal-unicursal
+    ></a-entity>
+
+  
+    <!-- Arcade VFX overlay: screen glitch, marquee pulse, button lights -->
+    
+
+  
+    <!-- Fake 2.5D depth rig for rear artwork -->
+    <a-entity id="backdrop-depth-rig">
+
+      <!-- subtle enlarged ghost layer: creates depth/parallax shimmer -->
+      <a-plane
+        id="backdrop-depth-ghost"
+        src="#background-clean"
+        position="0.04 2.13 -4.48"
+        rotation="0 -1 0"
+        width="4.95"
+        height="4.95"
+        material="shader: flat; transparent: true; opacity: 0.16; side: double"
+        animation__depthpulse="property: material.opacity; from: 0.08; to: 0.19; dir: alternate; loop: true; dur: 4200; easing: easeInOutSine"
+        animation__depthscale="property: scale; from: 1 1 1; to: 1.018 1.018 1.018; dir: alternate; loop: true; dur: 6200; easing: easeInOutSine"
+      ></a-plane>
+
+      <!-- red vertical glow side layer -->
+      <a-plane
+        id="backdrop-red-depth-edge"
+        position="1.98 2.12 -4.38"
+        rotation="0 -8 0"
+        width="0.18"
+        height="4.5"
+        material="shader: flat; color: #ff1648; transparent: true; opacity: 0.20; side: double"
+        animation__edgepulse="property: material.opacity; from: 0.08; to: 0.28; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
+      ></a-plane>
+
+      <!-- blue/cyan opposite side depth edge -->
+      <a-plane
+        id="backdrop-blue-depth-edge"
+        position="-1.98 2.12 -4.37"
+        rotation="0 8 0"
+        width="0.14"
+        height="4.3"
+        material="shader: flat; color: #347dff; transparent: true; opacity: 0.12; side: double"
+        animation__edgepulse="property: material.opacity; from: 0.04; to: 0.18; dir: alternate; loop: true; dur: 2300; easing: easeInOutSine"
+      ></a-plane>
+
+      <!-- small floating foreground particles between scene and backdrop -->
+      <a-entity id="backdrop-depth-particles">
+        <a-sphere position="-1.35 2.75 -3.55" radius="0.010" material="shader: flat; color: #ff3355; opacity: 0.75; transparent: true"
+          animation__float="property: position; from: -1.35 2.65 -3.55; to: -1.30 2.92 -3.50; dir: alternate; loop: true; dur: 3100; easing: easeInOutSine"></a-sphere>
+
+        <a-sphere position="-0.78 2.20 -3.42" radius="0.007" material="shader: flat; color: #ffffff; opacity: 0.55; transparent: true"
+          animation__float="property: position; from: -0.78 2.12 -3.42; to: -0.70 2.33 -3.38; dir: alternate; loop: true; dur: 2700; easing: easeInOutSine"></a-sphere>
+
+        <a-sphere position="0.12 2.82 -3.35" radius="0.008" material="shader: flat; color: #ff4466; opacity: 0.70; transparent: true"
+          animation__float="property: position; from: 0.12 2.70 -3.35; to: 0.22 2.98 -3.32; dir: alternate; loop: true; dur: 3600; easing: easeInOutSine"></a-sphere>
+
+        <a-sphere position="0.92 2.30 -3.30" radius="0.006" material="shader: flat; color: #66ccff; opacity: 0.58; transparent: true"
+          animation__float="property: position; from: 0.92 2.20 -3.30; to: 0.84 2.43 -3.25; dir: alternate; loop: true; dur: 2900; easing: easeInOutSine"></a-sphere>
+
+        <a-sphere position="1.42 2.74 -3.45" radius="0.011" material="shader: flat; color: #ff2255; opacity: 0.78; transparent: true"
+          animation__float="property: position; from: 1.42 2.62 -3.45; to: 1.32 2.88 -3.39; dir: alternate; loop: true; dur: 3300; easing: easeInOutSine"></a-sphere>
+
+        <a-sphere position="1.75 1.95 -3.28" radius="0.007" material="shader: flat; color: #ffffff; opacity: 0.48; transparent: true"
+          animation__float="property: position; from: 1.75 1.88 -3.28; to: 1.68 2.08 -3.23; dir: alternate; loop: true; dur: 2500; easing: easeInOutSine"></a-sphere>
+      </a-entity>
+    </a-entity>
+  
+    <!-- expanded floor zone -->
+    
+
+    
+
+    <!-- widened perimeter markers -->
+    <a-box position="0 0.05 2.75" width="8.2" height="0.08" depth="0.06" color="#330010" material="opacity: 0.14; transparent: true"></a-box>
+    <a-box position="0 0.05 -5.35" width="8.2" height="0.08" depth="0.06" color="#330010" material="opacity: 0.14; transparent: true"></a-box>
+    <a-box position="-4.05 0.05 -1.3" width="0.06" height="0.08" depth="8.2" color="#330010" material="opacity: 0.14; transparent: true"></a-box>
+    <a-box position="4.05 0.05 -1.3" width="0.06" height="0.08" depth="8.2" color="#330010" material="opacity: 0.14; transparent: true"></a-box>
+
+    <!-- occult arcade cluster 1: Tarot -->
+    
+
+    <!-- occult arcade cluster 2: Qabalah -->
+    
+
+    <!-- occult arcade cluster 3: Alchemy -->
+    
+
+    <!-- occult arcade cluster 4: Enochian -->
+    
+
+  
+    <!-- LIBER 333 HITBOX -->
+    <a-box
+      id="liber-333-hitbox"
+      class="clickable"
+      liber-333-link
+      position="0 1.18 -2.05"
+      width="1.12"
+      height="0.82"
+      depth="0.08"
+      material="opacity: 0.001; transparent: true; color: #ff0055">
+    </a-box>
+
+</a-scene>
+
+<script>
+if (window.AFRAME) {
+  if (!AFRAME.components["flicker-material"]) {
+    AFRAME.registerComponent("flicker-material", {
+      schema: {
+        min: {default: 0.18},
+        max: {default: 1.0},
+        speed: {default: 90}
+      },
+      init: function () {
+        this.timer = 0;
+      },
+      tick: function (time, dt) {
+        this.timer += dt;
+        if (this.timer > this.data.speed + Math.random() * 140) {
+          this.timer = 0;
+          const strong = Math.random() > 0.18;
+          const opacity = strong
+            ? this.data.min + Math.random() * (this.data.max - this.data.min)
+            : 0.03 + Math.random() * 0.12;
+          const intensity = strong
+            ? 1.1 + Math.random() * 2.2
+            : 0.2 + Math.random() * 0.6;
+
+          this.el.setAttribute("material", "opacity", opacity);
+          this.el.setAttribute("material", "emissiveIntensity", intensity);
+        }
+      }
+    });
+  }
+
+  if (!AFRAME.components["left-portal-unicursal"]) {
+    AFRAME.registerComponent("left-portal-unicursal", {
+      init: function () {
+        const el = this.el;
+
+        // dark screen inside the existing ring
+        const screen = document.createElement("a-circle");
+        screen.setAttribute("radius", "0.31");
+        screen.setAttribute("position", "0 0 -0.004");
+        screen.setAttribute("material", "shader: flat; color: #220015; opacity: 0.92; transparent: true");
+        el.appendChild(screen);
+
+        // soft inner glow
+        const glowDisc = document.createElement("a-circle");
+        glowDisc.setAttribute("radius", "0.23");
+        glowDisc.setAttribute("position", "0 0 -0.003");
+        glowDisc.setAttribute("material", "shader: flat; color: #370018; opacity: 0.24; transparent: true");
+        el.appendChild(glowDisc);
+
+        const group = document.createElement("a-entity");
+        group.setAttribute("id", "left-portal-unicursal-lines");
+        el.appendChild(group);
+
+        // approximate unicursal hexagram path
+        const pts = [
+          [ 0.00,  0.22],
+          [ 0.12,  0.07],
+          [ 0.29,  0.07],
+          [ 0.12, -0.05],
+          [ 0.21, -0.22],
+          [ 0.00, -0.09],
+          [-0.21, -0.22],
+          [-0.12, -0.05],
+          [-0.29,  0.07],
+          [-0.12,  0.07],
+          [ 0.00,  0.22]
+        ];
+
+        function addSegment(a, b, thickness = 0.016) {
+          const dx = b[0] - a[0];
+          const dy = b[1] - a[1];
+          const len = Math.sqrt(dx * dx + dy * dy);
+          const mx = (a[0] + b[0]) / 2;
+          const my = (a[1] + b[1]) / 2;
+          const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+
+          // outer glow strip
+          const glow = document.createElement("a-box");
+          glow.setAttribute("position", `${mx} ${my} 0.002`);
+          glow.setAttribute("width", (len + 0.010).toFixed(4));
+          glow.setAttribute("height", (thickness * 2.1).toFixed(4));
+          glow.setAttribute("depth", "0.004");
+          glow.setAttribute("rotation", `0 0 ${ang}`);
+          glow.setAttribute("material", "shader: flat; color: #ff3355; opacity: 0.18; transparent: true");
+          glow.setAttribute("flicker-material", "min: 0.05; max: 0.22; speed: 70");
+          group.appendChild(glow);
+
+          // bright core strip
+          const core = document.createElement("a-box");
+          core.setAttribute("position", `${mx} ${my} 0.006`);
+          core.setAttribute("width", len.toFixed(4));
+          core.setAttribute("height", thickness.toFixed(4));
+          core.setAttribute("depth", "0.008");
+          core.setAttribute("rotation", `0 0 ${ang}`);
+          core.setAttribute(
+            "material",
+            "color: #ff4466; emissive: #ff002a; emissiveIntensity: 2.4; opacity: 0.95; transparent: true"
+          );
+          core.setAttribute("flicker-material", "min: 0.32; max: 1.0; speed: 85");
+          group.appendChild(core);
+        }
+
+        for (let i = 0; i < pts.length - 1; i++) {
+          addSegment(pts[i], pts[i + 1]);
+        }
+
+        // small center spark
+        const spark = document.createElement("a-circle");
+        spark.setAttribute("radius", "0.022");
+        spark.setAttribute("position", "0 0 0.008");
+        spark.setAttribute("material", "shader: flat; color: #ff6680; opacity: 0.95; transparent: true");
+        spark.setAttribute("flicker-material", "min: 0.25; max: 1.0; speed: 60");
+        group.appendChild(spark);
+      }
+    });
+  }
+}
+</script>
+
+
+<script>
+if (window.AFRAME && !AFRAME.components["portal-bolt-v2"]) {
+  AFRAME.registerComponent("portal-bolt-v2", {
+    init: function () {
+      const el = this.el;
+
+      // wipe old portal children so the previous wrong sigil disappears
+      while (el.firstChild) el.removeChild(el.firstChild);
+
+      this.boundary = 0.095;   // movement radius inside the circle
+      this.pos = { x: 0, y: 0 };
+      this.vel = { x: 0.065, y: 0.048 };
+      this.spin = 0;
+
+      // dark screen inside the red ring
+      const screen = document.createElement("a-circle");
+      screen.setAttribute("radius", "0.315");
+      screen.setAttribute("position", "0 0 -0.004");
+      screen.setAttribute("material", "shader: flat; color: #170014; opacity: 0.94; transparent: true; side: double");
+      el.appendChild(screen);
+
+      // subtle inner glow
+      const inner = document.createElement("a-circle");
+      inner.setAttribute("radius", "0.255");
+      inner.setAttribute("position", "0 0 -0.003");
+      inner.setAttribute("material", "shader: flat; color: #2a0018; opacity: 0.22; transparent: true; side: double");
+      el.appendChild(inner);
+
+      // moving group
+      this.mover = document.createElement("a-entity");
+      this.mover.setAttribute("position", "0 0 0.008");
+      el.appendChild(this.mover);
+
+      // glow copy behind the main sigil
+      this.glow = document.createElement("a-image");
+      this.glow.setAttribute("src", "#unicursal-bolt");
+      this.glow.setAttribute("width", "0.54");
+      this.glow.setAttribute("height", "0.54");
+      this.glow.setAttribute("position", "0 0 0");
+      this.glow.setAttribute("material", "shader: flat; transparent: true; opacity: 0.24; alphaTest: 0.02; side: double");
+      this.mover.appendChild(this.glow);
+
+      // main sigil
+      this.bolt = document.createElement("a-image");
+      this.bolt.setAttribute("src", "#unicursal-bolt");
+      this.bolt.setAttribute("width", "0.44");
+      this.bolt.setAttribute("height", "0.44");
+      this.bolt.setAttribute("position", "0 0 0.003");
+      this.bolt.setAttribute("material", "shader: flat; transparent: true; opacity: 0.96; alphaTest: 0.02; side: double");
+      this.mover.appendChild(this.bolt);
+
+      // tiny center spark
+      this.spark = document.createElement("a-circle");
+      this.spark.setAttribute("radius", "0.012");
+      this.spark.setAttribute("position", "0 0 0.006");
+      this.spark.setAttribute("material", "shader: flat; color: #ff4d6d; opacity: 0.75; transparent: true");
+      this.mover.appendChild(this.spark);
+    },
+
+    tick: function (time, dt) {
+      const sec = dt / 1000;
+
+      // drift
+      let nx = this.pos.x + this.vel.x * sec;
+      let ny = this.pos.y + this.vel.y * sec;
+
+      // bounce off circular perimeter
+      const d = Math.sqrt(nx * nx + ny * ny);
+      if (d > this.boundary) {
+        const n = { x: nx / d, y: ny / d };
+        const dot = this.vel.x * n.x + this.vel.y * n.y;
+        this.vel.x = this.vel.x - 2 * dot * n.x;
+        this.vel.y = this.vel.y - 2 * dot * n.y;
+
+        nx = n.x * this.boundary;
+        ny = n.y * this.boundary;
+      }
+
+      this.pos.x = nx;
+      this.pos.y = ny;
+
+      // slow spin
+      this.spin += dt * 0.018;
+
+      // lightning-style burst flicker: mostly alive, sometimes white-hot
+      const wave = Math.abs(Math.sin(time * 0.018));
+      const micro = Math.random();
+      const burst = micro > 0.90 ? 1.0 : 0.0;
+      const blackout = micro < 0.08 ? 1.0 : 0.0;
+
+      const flicker = blackout
+        ? 0.08 + Math.random() * 0.12
+        : Math.min(1.0, 0.45 + wave * 0.35 + burst * 0.55);
+
+      const glowFlicker = blackout
+        ? 0.05
+        : Math.min(0.52, 0.16 + wave * 0.16 + burst * 0.30);
+
+      const pulse = 1.05 + 0.12 * burst + 0.045 * Math.sin(time * 0.006);
+
+      this.mover.object3D.position.set(this.pos.x, this.pos.y, 0.008);
+      this.mover.object3D.rotation.z = this.spin * Math.PI / 180;
+
+      this.bolt.object3D.scale.set(pulse, pulse, 1);
+      this.glow.object3D.scale.set(1.12 * pulse, 1.12 * pulse, 1);
+
+      this.bolt.setAttribute("material", "opacity", flicker);
+      this.glow.setAttribute("material", "opacity", glowFlicker);
+      this.spark.setAttribute("material", "opacity", 0.35 + 0.4 * flicker);
+    }
+  });
+}
+
+// retarget the existing portal entity to the new component
+window.addEventListener("load", function () {
+  const portal = document.querySelector("#left-floor-lightning-portal");
+  if (!portal) return;
+
+  portal.removeAttribute("left-portal-unicursal");
+  portal.setAttribute("portal-bolt-v2", "");
+});
+</script>
+
+
+<script>
+if (window.AFRAME && !AFRAME.components["arcade-glitch-vfx"]) {
+  AFRAME.registerComponent("arcade-glitch-vfx", {
+    init: function () {
+      this.screen = this.el.querySelector("#arcade-screen-glow");
+      this.rgbR = this.el.querySelector("#arcade-screen-r");
+      this.rgbG = this.el.querySelector("#arcade-screen-g");
+      this.rgbB = this.el.querySelector("#arcade-screen-b");
+      this.scan1 = this.el.querySelector("#arcade-glitch-bar-1");
+      this.scan2 = this.el.querySelector("#arcade-glitch-bar-2");
+      this.scan3 = this.el.querySelector("#arcade-glitch-bar-3");
+      this.marquee = this.el.querySelector("#arcade-marquee-glow");
+      this.buttons = Array.from(this.el.querySelectorAll(".arcade-button-light"));
+      this.joy = this.el.querySelector("#arcade-joystick-light");
+      this.frontLight = this.el.querySelector("#arcade-red-spill");
+      this.blueLight = this.el.querySelector("#arcade-blue-spill");
+    },
+
+    tick: function (time, dt) {
+      const fast = Math.sin(time * 0.055);
+      const faster = Math.sin(time * 0.115);
+      const burst = Math.random() > 0.78;
+      const hardCut = Math.random() > 0.92;
+
+      const palette = [
+        "#ff0033",
+        "#00ff66",
+        "#2277ff",
+        "#ff00cc",
+        "#00ffff",
+        "#ffffff"
+      ];
+
+      const baseOpacity = hardCut ? 0.18 : 0.48 + Math.abs(fast) * 0.34;
+
+      if (this.screen) {
+        this.screen.setAttribute("material", "color", palette[Math.floor(Math.random() * palette.length)]);
+        this.screen.setAttribute("material", "opacity", burst ? 0.95 : baseOpacity);
+        this.screen.object3D.scale.set(
+          burst ? 1.0 + (Math.random() - 0.5) * 0.08 : 1.0,
+          burst ? 1.0 + (Math.random() - 0.5) * 0.035 : 1.0,
+          1
+        );
+      }
+
+      // RGB color-channel ghosts: fast flickering offsets
+      const rgbLayers = [
+        [this.rgbR, "#ff0033", -0.012, 0.004],
+        [this.rgbG, "#00ff66", 0.000, -0.003],
+        [this.rgbB, "#2277ff", 0.012, 0.005]
+      ];
+
+      rgbLayers.forEach(([layer, color, ox, oy], i) => {
+        if (!layer) return;
+        const visible = Math.random() > 0.18;
+        const jitterX = ox + (Math.random() - 0.5) * 0.018;
+        const jitterY = oy + (Math.random() - 0.5) * 0.010;
+        layer.setAttribute("position", `${jitterX.toFixed(3)} ${(1.18 + jitterY).toFixed(3)} ${(0.386 + i * 0.004).toFixed(3)}`);
+        layer.setAttribute("material", "color", color);
+        layer.setAttribute("material", "opacity", visible ? 0.18 + Math.random() * 0.42 : 0.02);
+      });
+
+      // Thin RGB glitch strips, not big chunky bars
+      const bars = [this.scan1, this.scan2, this.scan3];
+      bars.forEach((bar, i) => {
+        if (!bar) return;
+        const visible = Math.random() > 0.28;
+        const y = 1.18 + (Math.random() - 0.5) * 0.30;
+        const x = (Math.random() - 0.5) * 0.035;
+        const z = 0.398 + i * 0.006;
+        const width = 0.18 + Math.random() * 0.46;
+        const height = 0.006 + Math.random() * 0.014;
+        const color = palette[Math.floor(Math.random() * 3)];
+
+        bar.setAttribute("position", `${x.toFixed(3)} ${y.toFixed(3)} ${z.toFixed(3)}`);
+        bar.setAttribute("width", width.toFixed(3));
+        bar.setAttribute("height", height.toFixed(3));
+        bar.setAttribute("material", "color", color);
+        bar.setAttribute("material", "opacity", visible ? 0.38 + Math.random() * 0.60 : 0.0);
+      });
+
+      if (this.marquee) {
+        const op = burst ? 0.98 : 0.34 + Math.abs(faster) * 0.35;
+        this.marquee.setAttribute("material", "color", Math.random() > 0.65 ? "#ff0033" : "#ffd36a");
+        this.marquee.setAttribute("material", "opacity", op);
+      }
+
+      this.buttons.forEach((b, i) => {
+        const colors = ["#ff0033", "#00ff66", "#2277ff"];
+        b.setAttribute("material", "color", colors[(Math.floor(time / 90) + i) % 3]);
+        b.setAttribute("material", "opacity", 0.55 + Math.random() * 0.40);
+      });
+
+      if (this.joy) {
+        this.joy.setAttribute("material", "color", Math.random() > 0.5 ? "#ff0033" : "#2277ff");
+        this.joy.setAttribute("material", "opacity", 0.55 + Math.random() * 0.35);
+      }
+
+      if (this.frontLight) {
+        this.frontLight.setAttribute("light", "color", Math.random() > 0.5 ? "#ff123f" : "#00ff66");
+        this.frontLight.setAttribute("light", "intensity", burst ? 2.7 : 0.75 + Math.random() * 0.75);
+      }
+
+      if (this.blueLight) {
+        this.blueLight.setAttribute("light", "color", Math.random() > 0.5 ? "#2277ff" : "#00ffff");
+        this.blueLight.setAttribute("light", "intensity", burst ? 2.3 : 0.55 + Math.random() * 0.55);
+      }
+    }
+  });
+}
+</script>
+
+
+<script>
+if (window.AFRAME && !AFRAME.components["bounded-vr-locomotion"]) {
+  AFRAME.registerComponent("bounded-vr-locomotion", {
+    schema: {
+      speed: { default: 1.25 },
+      turnDegrees: { default: 28 },
+      minX: { default: -1.75 },
+      maxX: { default: 1.75 },
+      minZ: { default: -3.05 },
+      maxZ: { default: 0.70 }
+    },
+
+    init: function () {
+      this.turnCooldown = 0;
+      this.tmp = new THREE.Vector3();
+      this.dir = new THREE.Vector3();
+    },
+
+    getAxes: function () {
+      const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+      let moveX = 0, moveY = 0, turnX = 0;
+
+      for (const gp of pads) {
+        if (!gp || !gp.connected || !gp.axes) continue;
+
+        // Quest / common WebXR mappings usually expose left stick on axes 2/3
+        // and right stick on axes 0/1 or 2/3 depending on hand/controller.
+        const ax = gp.axes;
+
+        // Prefer strongest movement axes pair.
+        const candidates = [
+          [ax[2] || 0, ax[3] || 0],
+          [ax[0] || 0, ax[1] || 0]
+        ];
+
+        for (const [x, y] of candidates) {
+          if (Math.abs(x) + Math.abs(y) > Math.abs(moveX) + Math.abs(moveY)) {
+            moveX = x;
+            moveY = y;
+          }
+        }
+
+        // Right-stick/snap-turn fallback: use horizontal axis when strong.
+        for (const x of [ax[0] || 0, ax[2] || 0]) {
+          if (Math.abs(x) > Math.abs(turnX)) turnX = x;
+        }
+      }
+
+      const dead = 0.18;
+      if (Math.abs(moveX) < dead) moveX = 0;
+      if (Math.abs(moveY) < dead) moveY = 0;
+      if (Math.abs(turnX) < 0.72) turnX = 0;
+
+      return { moveX, moveY, turnX };
+    },
+
+    tick: function (time, dt) {
+      const seconds = Math.min(dt / 1000, 0.05);
+      const rig = this.el;
+      const camera = rig.querySelector("[camera]");
+      if (!camera) return;
+
+      const axes = this.getAxes();
+
+      // Snap turn.
+      this.turnCooldown -= dt;
+      if (axes.turnX && this.turnCooldown <= 0) {
+        const rot = rig.getAttribute("rotation");
+        rot.y -= Math.sign(axes.turnX) * this.data.turnDegrees;
+        rig.setAttribute("rotation", rot);
+        this.turnCooldown = 320;
+      }
+
+      // Movement relative to headset yaw.
+      if (axes.moveX || axes.moveY) {
+        const camWorldRot = new THREE.Euler();
+        camWorldRot.setFromQuaternion(camera.object3D.getWorldQuaternion(new THREE.Quaternion()), "YXZ");
+
+        const yaw = camWorldRot.y;
+        const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+        const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+
+        const pos = rig.getAttribute("position");
+        const speed = this.data.speed * seconds;
+
+        pos.x += right.x * axes.moveX * speed;
+        pos.z += right.z * axes.moveX * speed;
+
+        // Negative stick Y usually means forward.
+        pos.x += forward.x * (-axes.moveY) * speed;
+        pos.z += forward.z * (-axes.moveY) * speed;
+
+        // Bound the player inside the theatrical set.
+        pos.x = Math.max(this.data.minX, Math.min(this.data.maxX, pos.x));
+        pos.z = Math.max(this.data.minZ, Math.min(this.data.maxZ, pos.z));
+        pos.y = 1.6;
+
+        rig.setAttribute("position", pos);
+      }
+    }
+  });
+}
+</script>
+
+
+<script id="audio-start-handler">
+window.addEventListener("load", function () {
+  const btn = document.getElementById("audio-start");
+  const audio = document.getElementById("arcade-theme-audio");
+  const overlay = document.getElementById("entry-overlay");
+
+  const playlist = [
+    { title: "Forget Me Remix 93", src: "assets/audio/track_01_forget_me.wav" },
+    { title: "Forest", src: "assets/audio/track_02_forest.mp3" },
+    { title: "The Zelda Song", src: "assets/audio/track_03_zelda.mp3" },
+    { title: "1950s Void Theory", src: "assets/audio/track_04_1950s_void.mp3" },
+    { title: "Here's RD", src: "assets/audio/track_05_heres_rd.mp3" }
+  ];
+
+  if (!btn || !audio || !overlay) return;
+
+  const selected = playlist[Math.floor(Math.random() * playlist.length)];
+  audio.src = selected.src;
+  audio.loop = true;
+  audio.volume = 0.58;
+  audio.preload = "auto";
+
+  let dismissed = false;
+
+  function hideOverlay() {
+    if (dismissed) return;
+    dismissed = true;
+    overlay.classList.add("hidden");
+    setTimeout(function () {
+      overlay.style.display = "none";
+    }, 520);
+  }
+
+  async function startAudioAndEnter() {
+    try {
+      audio.muted = false;
+      audio.volume = 0.58;
+
+      const result = audio.play();
+      if (result && typeof result.then === "function") {
+        await result;
+      }
+
+      if (!audio.paused) {
+        btn.classList.add("playing");
+        hideOverlay();
+        return true;
+      }
+
+      btn.classList.remove("playing");
+      return false;
+    } catch (err) {
+      btn.classList.remove("playing");
+      return false;
+    }
+  }
+
+  setTimeout(function () {
+    startAudioAndEnter();
+  }, 800);
+
+  btn.addEventListener("click", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    startAudioAndEnter();
+  });
+
+  const unlock = function () {
+    if (!dismissed) startAudioAndEnter();
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("touchstart", unlock);
+    window.removeEventListener("click", unlock);
+  };
+
+  window.addEventListener("pointerdown", unlock);
+  window.addEventListener("touchstart", unlock);
+  window.addEventListener("click", unlock);
+
+  audio.addEventListener("playing", function () {
+    btn.classList.add("playing");
+  });
+
+  audio.addEventListener("error", function () {
+    btn.classList.remove("playing");
+    console.warn("Audio failed to load:", selected.src, audio.error);
+  });
+});
+</script>
+
+
+<script>
+if (window.AFRAME && !AFRAME.components["occult-arcade-screen"]) {
+  AFRAME.registerComponent("occult-arcade-screen", {
+    schema: {
+      theme: { default: "tarot" }
+    },
+
+    init: function () {
+      this.screen = this.el.querySelector(".screen-fill");
+      this.title = this.el.querySelector(".screen-title");
+      this.sub = this.el.querySelector(".screen-sub");
+      this.rune = this.el.querySelector(".screen-rune");
+      this.bar1 = this.el.querySelector(".screen-bar-a");
+      this.bar2 = this.el.querySelector(".screen-bar-b");
+      this.baseY = this.el.object3D.position.y;
+      this.offset = Math.random() * Math.PI * 2;
+      this.lastFrame = 0;
+      this.fastUntil = 0;
+      this.frameIndex = 0;
+
+      this.framesByTheme = {
+        tarot: [
+          { title: "FOOL'S ASCENT", sub: "DRAW / LEAP / TRANSCEND", rune: "0 • I • XXI", color: "#ff2c6d", accent: "#42d7ff" },
+          { title: "TOWER RUN", sub: "STRIKE THE FALSE SELF", rune: "XVI // MARS", color: "#ff5533", accent: "#ffe066" },
+          { title: "BABALON MODE", sub: "CUPS / FIRE / WILL", rune: "XI // LUST", color: "#ff1e7c", accent: "#8a5cff" }
+        ],
+        qabalah: [
+          { title: "PATHWALKER", sub: "TRACE THE SEPHIROTH", rune: "10 → 1", color: "#00d5ff", accent: "#ff3864" },
+          { title: "ABYSS DIVE", sub: "CROSS WITHOUT FALLING", rune: "DAATH?", color: "#5b8cff", accent: "#ff66aa" },
+          { title: "LIGHTNING FLASH", sub: "EMANATE / RETURN", rune: "KETHER GRID", color: "#6ef3ff", accent: "#f9ff62" }
+        ],
+        alchemy: [
+          { title: "RUBEDO RUSH", sub: "FIX THE RED STONE", rune: "N • A • R", color: "#ff3a2f", accent: "#ffd166" },
+          { title: "NIGREDO LOOP", sub: "DISSOLVE THE MASK", rune: "☿ ☉ ☽", color: "#6f57ff", accent: "#42d7ff" },
+          { title: "AZOTH ENGINE", sub: "SEAL THE ELIXIR", rune: "SOLVE // COAGULA", color: "#ff7a00", accent: "#ff2c6d" }
+        ],
+        enochian: [
+          { title: "CALL OF THE AYR", sub: "OPEN THE GATES", rune: "ZAX / TEX / ARN", color: "#42d7ff", accent: "#9d4dff" },
+          { title: "WATCHTOWER RAID", sub: "TRACE THE TABLETS", rune: "AIR // FIRE", color: "#24ffa8", accent: "#42d7ff" },
+          { title: "SIGIL STORM", sub: "NAME / VIBRATE / BREAK", rune: "IAO / ZOD / OXO", color: "#00e1ff", accent: "#ff3864" }
+        ]
+      };
+
+      this.frames = this.framesByTheme[this.data.theme] || this.framesByTheme.tarot;
+
+      this.el.addEventListener("click", () => {
+        this.frameIndex = (this.frameIndex + 1) % this.frames.length;
+        this.fastUntil = performance.now() + 3200;
+        this.renderFrame();
+      });
+
+      this.renderFrame();
+    },
+
+    renderFrame: function () {
+      const f = this.frames[this.frameIndex % this.frames.length];
+      if (this.screen) {
+        this.screen.setAttribute("material", "color", f.color);
+        this.screen.setAttribute("material", "opacity", 0.92);
+      }
+      if (this.title) this.title.setAttribute("value", f.title);
+      if (this.sub) this.sub.setAttribute("value", f.sub);
+      if (this.rune) this.rune.setAttribute("value", f.rune);
+
+      if (this.bar1) {
+        this.bar1.setAttribute("material", "color", f.accent);
+        this.bar1.setAttribute("width", (0.18 + Math.random() * 0.22).toFixed(3));
+      }
+
+      if (this.bar2) {
+        this.bar2.setAttribute("material", "color", f.color);
+        this.bar2.setAttribute("width", (0.24 + Math.random() * 0.18).toFixed(3));
+      }
+    },
+
+    tick: function (time, dt) {
+      const interval = time < this.fastUntil ? 180 : 920;
+
+      if (time - this.lastFrame > interval) {
+        this.lastFrame = time;
+        this.frameIndex = (this.frameIndex + 1) % this.frames.length;
+        this.renderFrame();
+      }
+
+      const bob = Math.sin(time * 0.00115 + this.offset) * 0.015;
+      this.el.object3D.position.y = this.baseY + bob;
+
+      if (this.screen) {
+        const opacity = 0.74 + Math.abs(Math.sin(time * 0.004 + this.offset)) * 0.22;
+        this.screen.setAttribute("material", "opacity", opacity);
+      }
+    }
+  });
+}
+</script>
+
+
+<script>
+  // Future Liber 333 integration hook.
+  // Later this can open an in-scene oracle panel, iframe-like web surface, or external page fallback.
+  window.openLiber333Oracle = function openLiber333Oracle() {
+    window.open("https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/", "_blank", "noopener,noreferrer");
+  };
+</script>
+
 </body>
 </html>
