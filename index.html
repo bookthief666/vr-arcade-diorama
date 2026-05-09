@@ -7,306 +7,123 @@
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
 
   <style>
-    :root {
-      color-scheme: dark;
-      --red: #ff0038;
-      --cyan: #65dfff;
-      --void: #020004;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: var(--void);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+    :root { color-scheme: dark; --red: #ff0038; --cyan: #65dfff; --void: #020004; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--void); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 
     #entry-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: grid;
-      place-items: center;
-      padding: 22px;
-      background:
-        radial-gradient(circle at 50% 42%, rgba(125, 0, 55, 0.26), transparent 32%),
-        radial-gradient(circle at 50% 50%, rgba(20, 0, 18, 0.92), rgba(0, 0, 0, 0.98) 70%);
+      position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 22px;
+      background: radial-gradient(circle at 50% 42%, rgba(125, 0, 55, 0.26), transparent 32%), radial-gradient(circle at 50% 50%, rgba(20, 0, 18, 0.92), rgba(0, 0, 0, 0.98) 70%);
       transition: opacity 420ms ease;
     }
+    #entry-overlay.hidden { opacity: 0; pointer-events: none; }
+    #entry-overlay::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0, rgba(255,255,255,.035) 1px, transparent 2px, transparent 5px); opacity: .42; pointer-events: none; animation: scanlines 8s linear infinite; }
+    @keyframes scanlines { from { transform: translateY(0); } to { transform: translateY(18px); } }
 
-    #entry-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    #entry-panel { position: relative; width: min(92vw, 560px); padding: 28px 22px 24px; border: 1px solid rgba(255,35,92,.52); border-radius: 22px; background: linear-gradient(180deg, rgba(28,0,18,.94), rgba(6,0,8,.97)); box-shadow: 0 0 28px rgba(255,0,62,.18), 0 0 88px rgba(100,0,180,.12), inset 0 0 24px rgba(255,0,70,.08); text-align: center; overflow: hidden; }
+    #entry-panel::before { content: ""; position: absolute; left: -30%; right: -30%; top: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,0,64,.95), transparent); box-shadow: 0 0 16px rgba(255,0,64,.75); animation: sweep 2.8s linear infinite; }
+    @keyframes sweep { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(330px); opacity: 0; } }
 
-    #entry-overlay::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.035) 0,
-        rgba(255, 255, 255, 0.035) 1px,
-        transparent 2px,
-        transparent 5px
-      );
-      opacity: 0.42;
-      pointer-events: none;
-      animation: scanlines 8s linear infinite;
-    }
+    .entry-kicker { margin: 0 0 10px; color: rgba(255,160,190,.76); font-size: 11px; font-weight: 800; letter-spacing: .28em; text-transform: uppercase; }
+    .entry-title { margin: 0; color: #fff1f5; font-size: clamp(26px, 7vw, 46px); line-height: .98; letter-spacing: .05em; text-transform: uppercase; text-shadow: 0 0 12px rgba(255,0,64,.45), 0 0 34px rgba(120,0,255,.24); }
+    .entry-sub { margin: 14px auto 18px; max-width: 410px; color: rgba(210,225,255,.72); font-size: 12px; line-height: 1.55; letter-spacing: .08em; text-transform: uppercase; }
+    #load-track { width: min(100%, 430px); height: 10px; margin: 0 auto 16px; border: 1px solid rgba(255,0,64,.36); border-radius: 999px; background: rgba(8,0,8,.88); overflow: hidden; box-shadow: inset 0 0 12px rgba(255,0,64,.12); }
+    #load-bar { width: 0%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(255,0,64,.55), rgba(255,80,120,.98), rgba(100,225,255,.78)); box-shadow: 0 0 14px rgba(255,0,64,.62); transition: width 220ms ease; }
+    #enter-button { appearance: none; width: min(100%, 430px); min-height: 64px; border: 1px solid rgba(255,0,64,.42); border-radius: 16px; background: linear-gradient(180deg, rgba(34,0,18,.98), rgba(7,0,8,.98)); color: rgba(255,220,230,.68); font-size: 15px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,0,64,.22); box-shadow: inset 0 0 18px rgba(255,0,64,.08); }
+    #enter-button.ready { cursor: pointer; color: #fff1f4; border-color: rgba(255,50,104,.92); box-shadow: 0 0 24px rgba(255,0,64,.34), inset 0 0 18px rgba(255,0,64,.12); }
+    #status-line { margin-top: 12px; min-height: 16px; color: rgba(255,170,200,.68); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
 
-    @keyframes scanlines {
-      from { transform: translateY(0); }
-      to { transform: translateY(18px); }
-    }
-
-    #entry-panel {
-      position: relative;
-      width: min(92vw, 560px);
-      padding: 28px 22px 24px;
-      border: 1px solid rgba(255, 35, 92, 0.52);
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(28, 0, 18, 0.94), rgba(6, 0, 8, 0.97));
-      box-shadow:
-        0 0 28px rgba(255, 0, 62, 0.18),
-        0 0 88px rgba(100, 0, 180, 0.12),
-        inset 0 0 24px rgba(255, 0, 70, 0.08);
-      text-align: center;
-      overflow: hidden;
-    }
-
-    #entry-panel::before {
-      content: "";
-      position: absolute;
-      left: -30%;
-      right: -30%;
-      top: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(255, 0, 64, 0.95), transparent);
-      box-shadow: 0 0 16px rgba(255, 0, 64, 0.75);
-      animation: sweep 2.8s linear infinite;
-    }
-
-    @keyframes sweep {
-      0% { transform: translateY(0); opacity: 0; }
-      10% { opacity: 1; }
-      100% { transform: translateY(330px); opacity: 0; }
-    }
-
-    .entry-kicker {
-      margin: 0 0 10px;
-      color: rgba(255, 160, 190, 0.76);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-    }
-
-    .entry-title {
-      margin: 0;
-      color: #fff1f5;
-      font-size: clamp(26px, 7vw, 46px);
-      line-height: 0.98;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      text-shadow:
-        0 0 12px rgba(255, 0, 64, 0.45),
-        0 0 34px rgba(120, 0, 255, 0.24);
-    }
-
-    .entry-sub {
-      margin: 14px auto 18px;
-      max-width: 410px;
-      color: rgba(210, 225, 255, 0.72);
-      font-size: 12px;
-      line-height: 1.55;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    #load-track {
-      width: min(100%, 430px);
-      height: 10px;
-      margin: 0 auto 16px;
-      border: 1px solid rgba(255, 0, 64, 0.36);
-      border-radius: 999px;
-      background: rgba(8, 0, 8, 0.88);
-      overflow: hidden;
-      box-shadow: inset 0 0 12px rgba(255, 0, 64, 0.12);
-    }
-
-    #load-bar {
-      width: 0%;
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255, 0, 64, 0.55), rgba(255, 80, 120, 0.98), rgba(100, 225, 255, 0.78));
-      box-shadow: 0 0 14px rgba(255, 0, 64, 0.62);
-      transition: width 220ms ease;
-    }
-
-    #enter-button {
-      appearance: none;
-      width: min(100%, 430px);
-      min-height: 64px;
-      border: 1px solid rgba(255, 0, 64, 0.42);
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(34, 0, 18, 0.98), rgba(7, 0, 8, 0.98));
-      color: rgba(255, 220, 230, 0.68);
-      font-size: 15px;
-      font-weight: 900;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px rgba(255, 0, 64, 0.22);
-      box-shadow: inset 0 0 18px rgba(255, 0, 64, 0.08);
-    }
-
-    #enter-button.ready {
-      cursor: pointer;
-      color: #fff1f4;
-      border-color: rgba(255, 50, 104, 0.92);
-      box-shadow:
-        0 0 24px rgba(255, 0, 64, 0.34),
-        inset 0 0 18px rgba(255, 0, 64, 0.12);
-    }
-
-    #status-line {
-      margin-top: 12px;
-      min-height: 16px;
-      color: rgba(255, 170, 200, 0.68);
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    #oracle-toast {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      z-index: 20;
-      transform: translateX(-50%) translateY(16px);
-      opacity: 0;
-      pointer-events: none;
-      padding: 10px 14px;
-      border: 1px solid rgba(255, 0, 64, 0.48);
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.74);
-      color: #ffdbe4;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px rgba(255, 0, 64, 0.46);
-      transition: opacity 180ms ease, transform 180ms ease;
-    }
-
-    #oracle-toast.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    #oracle-toast, #model-status { position: fixed; z-index: 20; pointer-events: none; border: 1px solid rgba(255,0,64,.48); background: rgba(0,0,0,.74); color: #ffdbe4; text-shadow: 0 0 10px rgba(255,0,64,.46); }
+    #oracle-toast { left: 50%; bottom: 22px; transform: translateX(-50%) translateY(16px); opacity: 0; padding: 10px 14px; border-radius: 999px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; transition: opacity 180ms ease, transform 180ms ease; }
+    #oracle-toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #model-status { left: 10px; top: 10px; max-width: 320px; padding: 8px 10px; border-radius: 10px; opacity: .82; font-size: 11px; line-height: 1.35; color: rgba(255,220,230,.78); }
   </style>
 
   <script>
     const ORACLE_URL = 'https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/';
+    const WALL_ART_URLS = [
+      'assets/images/walls/wall_01.jpg',
+      'assets/images/walls/wall_02.jpg',
+      'assets/images/walls/wall_03.jpg',
+      'assets/images/walls/wall_04.jpg',
+      'assets/images/walls/wall_05.jpg'
+    ];
     let TEMPLE_ENTERED = false;
+    const MODEL_STATE = { total: 4, loaded: 0, failed: 0 };
+
+    function updateModelStatus(extra = '') {
+      const node = document.getElementById('model-status');
+      if (!node) return;
+      const base = `3D models: ${MODEL_STATE.loaded}/${MODEL_STATE.total} loaded${MODEL_STATE.failed ? `, ${MODEL_STATE.failed} failed` : ''}`;
+      node.textContent = extra ? `${base} — ${extra}` : base;
+    }
 
     AFRAME.registerComponent('fit-model', {
-      schema: {
-        height: { default: 1.8 },
-        center: { default: true },
-        floor: { default: true }
-      },
-      init: function () {
-        this.el.addEventListener('model-loaded', () => this.fit());
-      },
+      schema: { height: { default: 1.8 }, center: { default: true }, floor: { default: true } },
+      init: function () { this.el.addEventListener('model-loaded', () => this.fit()); },
       fit: function () {
         window.setTimeout(() => {
           const mesh = this.el.getObject3D('mesh');
           if (!mesh) return;
-
           const object = this.el.object3D;
           const parent = object.parent;
           object.updateMatrixWorld(true);
-
           const targetWorld = new THREE.Vector3();
           object.getWorldPosition(targetWorld);
-
           const initialBox = new THREE.Box3().setFromObject(mesh);
           const initialSize = new THREE.Vector3();
           initialBox.getSize(initialSize);
           if (!Number.isFinite(initialSize.y) || initialSize.y <= 0) return;
-
-          const scaleFactor = this.data.height / initialSize.y;
-          object.scale.multiplyScalar(scaleFactor);
+          object.scale.multiplyScalar(this.data.height / initialSize.y);
           object.updateMatrixWorld(true);
-
           const fittedBox = new THREE.Box3().setFromObject(mesh);
           const fittedCenter = new THREE.Vector3();
           fittedBox.getCenter(fittedCenter);
-
           const desiredWorld = targetWorld.clone();
-          if (this.data.center) {
-            desiredWorld.x += targetWorld.x - fittedCenter.x;
-            desiredWorld.z += targetWorld.z - fittedCenter.z;
-          }
-          if (this.data.floor) {
-            desiredWorld.y += targetWorld.y - fittedBox.min.y;
-          }
-
+          if (this.data.center) { desiredWorld.x += targetWorld.x - fittedCenter.x; desiredWorld.z += targetWorld.z - fittedCenter.z; }
+          if (this.data.floor) desiredWorld.y += targetWorld.y - fittedBox.min.y;
           if (parent) {
             const currentLocal = parent.worldToLocal(targetWorld.clone());
             const desiredLocal = parent.worldToLocal(desiredWorld.clone());
             object.position.add(desiredLocal.sub(currentLocal));
-          } else {
-            object.position.add(desiredWorld.sub(targetWorld));
-          }
+          } else object.position.add(desiredWorld.sub(targetWorld));
         }, 0);
       }
     });
 
-    AFRAME.registerComponent('hide-on-model-ready', {
-      schema: { target: { type: 'selector' } },
+    AFRAME.registerComponent('model-watch', {
+      schema: { name: { default: 'model' }, proxy: { type: 'selector' } },
       init: function () {
         this.el.addEventListener('model-loaded', () => {
-          if (this.data.target) this.data.target.setAttribute('visible', 'false');
+          MODEL_STATE.loaded += 1;
+          if (this.data.proxy) this.data.proxy.setAttribute('visible', 'false');
+          updateModelStatus(`${this.data.name} ready`);
+        });
+        this.el.addEventListener('model-error', () => {
+          MODEL_STATE.failed += 1;
+          updateModelStatus(`${this.data.name} failed`);
+          console.warn(`[GEIST] ${this.data.name} model failed to load`, this.el.getAttribute('gltf-model') || this.el.getAttribute('src'));
         });
       }
     });
 
     AFRAME.registerComponent('oracle-link', {
-      schema: {
-        url: { type: 'string', default: ORACLE_URL },
-        label: { type: 'string', default: 'Opening Liber 333 Oracle' }
-      },
+      schema: { url: { type: 'string', default: ORACLE_URL }, label: { type: 'string', default: 'Opening Liber 333 Oracle' } },
       init: function () {
         const open = () => {
           if (!TEMPLE_ENTERED) return;
           showToast(this.data.label);
           window.open(this.data.url || ORACLE_URL, '_blank', 'noopener,noreferrer');
         };
-
         this.el.addEventListener('click', open);
-        this.el.addEventListener('mouseenter', () => {
-          if (!TEMPLE_ENTERED) return;
-          this.el.emit('oracle-hover-on');
-          showToast('Tap Liber 333 to open the oracle');
-        });
+        this.el.addEventListener('mouseenter', () => { if (!TEMPLE_ENTERED) return; this.el.emit('oracle-hover-on'); showToast('Tap Liber 333 to open the oracle'); });
         this.el.addEventListener('mouseleave', () => this.el.emit('oracle-hover-off'));
       }
     });
 
     AFRAME.registerComponent('slow-float', {
-      schema: {
-        amount: { default: 0.035 },
-        speed: { default: 0.0014 }
-      },
-      init: function () {
-        this.baseY = this.el.object3D.position.y;
-      },
-      tick: function (time) {
-        this.el.object3D.position.y = this.baseY + Math.sin(time * this.data.speed) * this.data.amount;
-      }
+      schema: { amount: { default: 0.035 }, speed: { default: 0.0014 } },
+      init: function () { this.baseY = this.el.object3D.position.y; },
+      tick: function (time) { this.el.object3D.position.y = this.baseY + Math.sin(time * this.data.speed) * this.data.amount; }
     });
 
     function showToast(message) {
@@ -318,6 +135,16 @@
       showToast.timer = window.setTimeout(() => toast.classList.remove('visible'), 1600);
     }
 
+    function applyOptionalWallArt() {
+      document.querySelectorAll('.wall-panel').forEach((panel, index) => {
+        const url = WALL_ART_URLS[index];
+        const probe = new Image();
+        probe.onload = () => panel.setAttribute('src', url);
+        probe.onerror = () => panel.setAttribute('src', '#backdrop-img');
+        probe.src = url;
+      });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       const overlay = document.getElementById('entry-overlay');
       const button = document.getElementById('enter-button');
@@ -326,42 +153,29 @@
       const assets = document.querySelector('a-assets');
       let ready = false;
       let progress = 8;
+      updateModelStatus('streaming after entry');
+      applyOptionalWallArt();
 
-      const setProgress = (value) => {
-        progress = Math.max(progress, Math.min(value, 100));
-        if (bar) bar.style.width = `${progress}%`;
-      };
-
-      const fakeLoad = window.setInterval(() => {
-        if (ready) return;
-        setProgress(Math.min(88, progress + Math.random() * 6 + 2));
-      }, 260);
-
+      const setProgress = (value) => { progress = Math.max(progress, Math.min(value, 100)); if (bar) bar.style.width = `${progress}%`; };
+      const fakeLoad = window.setInterval(() => { if (!ready) setProgress(Math.min(88, progress + Math.random() * 6 + 2)); }, 260);
       const markReady = () => {
         if (ready) return;
         ready = true;
         window.clearInterval(fakeLoad);
         setProgress(100);
-        if (status) status.textContent = 'Assets sealed. Temple ready.';
-        if (button) {
-          button.disabled = false;
-          button.classList.add('ready');
-          button.textContent = 'Enter Temple';
-        }
+        if (status) status.textContent = 'Room sealed. 3D models stream in place.';
+        if (button) { button.disabled = false; button.classList.add('ready'); button.textContent = 'Enter Temple'; }
       };
-
       if (assets && assets.hasLoaded) markReady();
       else if (assets) assets.addEventListener('loaded', markReady);
-      else window.setTimeout(markReady, 1200);
-
-      window.setTimeout(markReady, 14000);
-
+      else window.setTimeout(markReady, 900);
+      window.setTimeout(markReady, 5000);
       button?.addEventListener('click', () => {
         if (!ready) return;
         TEMPLE_ENTERED = true;
         overlay?.classList.add('hidden');
         window.setTimeout(() => overlay?.remove(), 520);
-        showToast('Temple entered. Tap the Liber 333 cabinet when ready.');
+        showToast('Temple entered. Tap Liber 333 when ready.');
       });
     });
   </script>
@@ -370,113 +184,99 @@
 <body>
   <div id="entry-overlay">
     <section id="entry-panel" aria-label="Enter GEIST Arcade">
-      <p class="entry-kicker">GEIST ARCADE / CLEAN ROOM V1</p>
+      <p class="entry-kicker">GEIST ARCADE / COMPACT ROOM V1</p>
       <h1 class="entry-title">Liber 333<br />Oracle Cabinet</h1>
       <p class="entry-sub">A compact occult arcade chamber. The central cabinet opens the Liber 333 oracle in a full browser page.</p>
       <div id="load-track"><div id="load-bar"></div></div>
-      <button id="enter-button" disabled>Rendering Assets</button>
-      <div id="status-line">Loading ritual floor, priestess, and oracle cabinet...</div>
+      <button id="enter-button" disabled>Rendering Room</button>
+      <div id="status-line">Loading ritual floor and wall art...</div>
     </section>
   </div>
-
   <div id="oracle-toast">Tap Liber 333 to open the oracle</div>
+  <div id="model-status">3D models: pending</div>
 
-  <a-scene
-    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false"
-    background="color: #020004"
-    fog="type: exponential; color: #030006; density: 0.022"
-    xr-mode-ui="enabled: true"
-    webxr="optionalFeatures: local-floor, bounded-floor"
-  >
-    <a-assets timeout="14000">
+  <a-scene renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false" background="color: #020004" fog="type: exponential; color: #030006; density: 0.038" xr-mode-ui="enabled: true" webxr="optionalFeatures: local-floor, bounded-floor">
+    <a-assets timeout="6000">
       <img id="floor-pattern" src="assets/images/floor_led_pattern.png" crossorigin="anonymous" />
       <img id="backdrop-img" src="assets/images/newarcadebackdrop.jpg" crossorigin="anonymous" />
       <img id="sigil-marker" src="assets/images/unicursal_bolt_red_alpha.png" crossorigin="anonymous" />
-
-      <a-asset-item id="model-priestess" src="assets/models/character.glb"></a-asset-item>
-      <a-asset-item id="model-liber-333" src="assets/models/cabinets/liber_nox.glb"></a-asset-item>
-      <a-asset-item id="model-cabinet-left" src="assets/models/cabinets/cabinet_02.glb"></a-asset-item>
-      <a-asset-item id="model-cabinet-right" src="assets/models/cabinets/cabinet_06.glb"></a-asset-item>
     </a-assets>
 
     <a-sky color="#020004"></a-sky>
 
     <a-entity id="lighting">
-      <a-entity light="type: ambient; color: #3b1525; intensity: 1.05"></a-entity>
-      <a-entity light="type: hemisphere; color: #4d1830; groundColor: #050006; intensity: 0.55"></a-entity>
-      <a-entity light="type: point; color: #ff174f; intensity: 2.35; distance: 9; decay: 1.25" position="0 2.7 -3.25"></a-entity>
-      <a-entity light="type: point; color: #6bdcff; intensity: 0.95; distance: 8; decay: 1.4" position="-3.6 2.1 -1.5"></a-entity>
-      <a-entity light="type: point; color: #ffb36b; intensity: 1.1; distance: 7; decay: 1.4" position="3.2 2.0 -2.2"></a-entity>
+      <a-entity light="type: ambient; color: #3b1525; intensity: 1.12"></a-entity>
+      <a-entity light="type: hemisphere; color: #4d1830; groundColor: #050006; intensity: 0.65"></a-entity>
+      <a-entity light="type: point; color: #ff174f; intensity: 2.55; distance: 5.5; decay: 1.25" position="0 2.45 -2.35"></a-entity>
+      <a-entity light="type: point; color: #6bdcff; intensity: 1.05; distance: 4.5; decay: 1.45" position="-2.15 1.8 -1.45"></a-entity>
+      <a-entity light="type: point; color: #ffb36b; intensity: 1.1; distance: 4.5; decay: 1.45" position="2.15 1.8 -1.45"></a-entity>
     </a-entity>
 
     <a-entity id="environment">
-      <a-plane id="dark-base-floor" position="0 -0.012 0" rotation="-90 0 0" width="18" height="18" material="color: #050006; roughness: 0.92; metalness: 0.02"></a-plane>
-      <a-circle id="ritual-pattern-floor" position="0 0.004 0" rotation="-90 0 0" radius="7.3" segments="96" material="src: #floor-pattern; repeat: 5 5; shader: flat; transparent: true; opacity: 0.86; side: double"></a-circle>
-      <a-ring id="outer-floor-boundary" position="0 0.012 0" rotation="-90 0 0" radius-inner="7.25" radius-outer="7.34" segments-theta="128" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.32; side: double"></a-ring>
+      <a-plane id="dark-base-floor" position="0 -0.012 0" rotation="-90 0 0" width="9" height="9" material="color: #050006; roughness: 0.92; metalness: 0.02"></a-plane>
+      <a-circle id="ritual-pattern-floor" position="0 0.004 0" rotation="-90 0 0" radius="3.75" segments="96" material="src: #floor-pattern; repeat: 3 3; shader: flat; transparent: true; opacity: 0.88; side: double"></a-circle>
+      <a-ring id="outer-floor-boundary" position="0 0.012 0" rotation="-90 0 0" radius-inner="3.70" radius-outer="3.77" segments-theta="128" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.36; side: double"></a-ring>
 
       <a-entity id="backdrop-panels">
-        <a-image src="#backdrop-img" position="-5.35 2.3 -3.75" rotation="0 55 0" width="4.2" height="4.3" material="shader: flat; transparent: true; opacity: 0.19; side: double"></a-image>
-        <a-image src="#backdrop-img" position="-3.75 2.3 -5.35" rotation="0 38 0" width="4.2" height="4.3" material="shader: flat; transparent: true; opacity: 0.21; side: double"></a-image>
-        <a-image src="#backdrop-img" position="-1.65 2.3 -6.35" rotation="0 16 0" width="4.2" height="4.3" material="shader: flat; transparent: true; opacity: 0.22; side: double"></a-image>
-        <a-image src="#backdrop-img" position="0 2.3 -6.65" rotation="0 0 0" width="4.4" height="4.5" material="shader: flat; transparent: true; opacity: 0.24; side: double"></a-image>
-        <a-image src="#backdrop-img" position="1.65 2.3 -6.35" rotation="0 -16 0" width="4.2" height="4.3" material="shader: flat; transparent: true; opacity: 0.22; side: double"></a-image>
-        <a-image src="#backdrop-img" position="3.75 2.3 -5.35" rotation="0 -38 0" width="4.2" height="4.3" material="shader: flat; transparent: true; opacity: 0.21; side: double"></a-image>
-        <a-image src="#backdrop-img" position="5.35 2.3 -3.75" rotation="0 -55 0" width="4.2" height="4.3" material="shader: flat; transparent: true; opacity: 0.19; side: double"></a-image>
+        <a-image class="wall-panel" src="#backdrop-img" position="-2.95 1.75 -2.75" rotation="0 48 0" width="2.2" height="2.75" material="shader: flat; transparent: true; opacity: 0.26; side: double"></a-image>
+        <a-image class="wall-panel" src="#backdrop-img" position="-1.45 1.75 -3.48" rotation="0 24 0" width="2.2" height="2.75" material="shader: flat; transparent: true; opacity: 0.28; side: double"></a-image>
+        <a-image class="wall-panel" src="#backdrop-img" position="0 1.75 -3.68" rotation="0 0 0" width="2.25" height="2.85" material="shader: flat; transparent: true; opacity: 0.30; side: double"></a-image>
+        <a-image class="wall-panel" src="#backdrop-img" position="1.45 1.75 -3.48" rotation="0 -24 0" width="2.2" height="2.75" material="shader: flat; transparent: true; opacity: 0.28; side: double"></a-image>
+        <a-image class="wall-panel" src="#backdrop-img" position="2.95 1.75 -2.75" rotation="0 -48 0" width="2.2" height="2.75" material="shader: flat; transparent: true; opacity: 0.26; side: double"></a-image>
       </a-entity>
     </a-entity>
 
     <a-entity id="arcade-room-layout">
-      <a-entity id="liber-333-proxy" position="0 0 -4.15">
-        <a-box position="0 1.05 0" width="1.35" height="2.1" depth="0.72" material="color: #090009; metalness: 0.35; roughness: 0.55"></a-box>
-        <a-box position="0 2.18 0.03" width="1.55" height="0.32" depth="0.78" material="shader: flat; color: #17000b"></a-box>
-        <a-plane position="0 1.42 0.37" width="1.02" height="0.58" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.16"></a-plane>
-        <a-text value="LIBER 333" position="0 1.45 0.385" align="center" color="#ffe6ed" width="2.8" material="shader: flat"></a-text>
+      <a-entity id="left-cabinet-proxy" position="-1.35 0 -2.28" rotation="0 18 0">
+        <a-box position="0 0.9 0" width="0.86" height="1.8" depth="0.58" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
+        <a-plane position="0 1.28 0.305" width="0.62" height="0.40" material="shader: flat; color: #65dfff; transparent: true; opacity: 0.22"></a-plane>
       </a-entity>
 
-      <a-gltf-model id="liber-333-cabinet" src="#model-liber-333" position="0 0 -4.15" rotation="0 0 0" fit-model="height: 2.12; center: true; floor: true" hide-on-model-ready="target: #liber-333-proxy"></a-gltf-model>
-
-      <a-entity id="oracle-attract-screen" position="0 1.36 -3.57" rotation="0 0 0" slow-float="amount: 0.018; speed: 0.0017">
-        <a-plane width="1.12" height="0.62" material="shader: flat; color: #09000b; transparent: true; opacity: 0.88"></a-plane>
-        <a-plane position="0 0 0.006" width="1.02" height="0.52" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.09" animation="property: material.opacity; from: 0.06; to: 0.16; dur: 1500; dir: alternate; loop: true; easing: easeInOutSine"></a-plane>
-        <a-text value="LIBER 333" position="0 0.12 0.012" align="center" color="#ffe6ed" width="2.6" material="shader: flat"></a-text>
-        <a-text value="TAP TO OPEN" position="0 -0.08 0.012" align="center" color="#ff5d86" width="2.1" material="shader: flat"></a-text>
+      <a-entity id="liber-333-proxy" position="0 0 -2.55">
+        <a-box position="0 1.05 0" width="1.02" height="2.1" depth="0.66" material="color: #090009; metalness: 0.35; roughness: 0.55"></a-box>
+        <a-box position="0 2.18 0.03" width="1.20" height="0.32" depth="0.72" material="shader: flat; color: #17000b"></a-box>
+        <a-plane position="0 1.42 0.345" width="0.82" height="0.50" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.18"></a-plane>
+        <a-text value="LIBER 333" position="0 1.45 0.36" align="center" color="#ffe6ed" width="2.3" material="shader: flat"></a-text>
+        <a-text value="TAP TO OPEN" position="0 1.30 0.36" align="center" color="#ff6a93" width="1.7" material="shader: flat"></a-text>
       </a-entity>
 
-      <a-box id="liber-333-hitbox" class="clickable" position="0 1.18 -3.74" width="2.25" height="2.35" depth="0.82" material="color: #ff0038; transparent: true; opacity: 0.001; depthWrite: false" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle" animation__hoveron="property: scale; startEvents: oracle-hover-on; to: 1.018 1.018 1.018; dur: 120; easing: easeOutQuad" animation__hoveroff="property: scale; startEvents: oracle-hover-off; to: 1 1 1; dur: 180; easing: easeOutQuad"></a-box>
-
-      <a-entity id="liber-333-floor-marker" position="0 0.034 -2.95" class="clickable" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle">
-        <a-circle rotation="-90 0 0" radius="0.72" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.055; side: double" animation="property: material.opacity; from: 0.035; to: 0.09; dur: 1200; dir: alternate; loop: true; easing: easeInOutSine"></a-circle>
-        <a-image src="#sigil-marker" position="0 0.006 0" rotation="-90 0 0" width="0.92" height="0.92" material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double" animation="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 18000; easing: linear"></a-image>
+      <a-entity id="right-cabinet-proxy" position="1.35 0 -2.28" rotation="0 -18 0">
+        <a-box position="0 0.9 0" width="0.86" height="1.8" depth="0.58" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
+        <a-plane position="0 1.28 0.305" width="0.62" height="0.40" material="shader: flat; color: #ffb36b; transparent: true; opacity: 0.22"></a-plane>
       </a-entity>
 
-      <a-entity id="priestess-proxy" position="0.92 0 -3.42" rotation="0 -24 0">
-        <a-cylinder position="0 0.85 0" radius="0.18" height="1.55" material="color: #190010; transparent: true; opacity: 0.72"></a-cylinder>
-        <a-sphere position="0 1.68 0" radius="0.18" material="color: #ffb3c8; transparent: true; opacity: 0.72"></a-sphere>
-        <a-ring position="0 1.78 0.01" radius-inner="0.24" radius-outer="0.28" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.64"></a-ring>
+      <a-entity id="priestess-proxy" position="0.82 0 -2.68" rotation="0 -20 0">
+        <a-cylinder position="0 0.78 0" radius="0.13" height="1.36" material="color: #190010; transparent: true; opacity: 0.72"></a-cylinder>
+        <a-sphere position="0 1.52 0" radius="0.14" material="color: #ffb3c8; transparent: true; opacity: 0.72"></a-sphere>
+        <a-ring position="0 1.62 0.01" radius-inner="0.20" radius-outer="0.235" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.64"></a-ring>
       </a-entity>
 
-      <a-gltf-model id="priestess-figure" src="#model-priestess" position="0.92 0 -3.42" rotation="0 -24 0" fit-model="height: 1.72; center: true; floor: true" hide-on-model-ready="target: #priestess-proxy"></a-gltf-model>
+      <a-entity id="secondary-cabinet-left" gltf-model="url(assets/models/cabinets/cabinet_02.glb)" position="-1.35 0 -2.28" rotation="0 18 0" fit-model="height: 1.72; center: true; floor: true" model-watch="name: left cabinet; proxy: #left-cabinet-proxy"></a-entity>
+      <a-entity id="liber-333-cabinet" gltf-model="url(assets/models/cabinets/liber_nox.glb)" position="0 0 -2.55" rotation="0 0 0" fit-model="height: 2.02; center: true; floor: true" model-watch="name: Liber 333; proxy: #liber-333-proxy"></a-entity>
+      <a-entity id="secondary-cabinet-right" gltf-model="url(assets/models/cabinets/cabinet_06.glb)" position="1.35 0 -2.28" rotation="0 -18 0" fit-model="height: 1.72; center: true; floor: true" model-watch="name: right cabinet; proxy: #right-cabinet-proxy"></a-entity>
+      <a-entity id="priestess-figure" gltf-model="url(assets/models/character.glb)" position="0.82 0 -2.68" rotation="0 -20 0" fit-model="height: 1.60; center: true; floor: true" model-watch="name: priestess; proxy: #priestess-proxy"></a-entity>
 
-      <a-entity id="left-cabinet-proxy" position="-3.35 0 -2.08" rotation="0 56 0">
-        <a-box position="0 0.9 0" width="1.0" height="1.8" depth="0.62" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
-        <a-plane position="0 1.28 0.32" width="0.72" height="0.46" material="shader: flat; color: #65dfff; transparent: true; opacity: 0.18"></a-plane>
+      <a-entity id="oracle-attract-screen" position="0 1.36 -2.16" rotation="0 0 0" slow-float="amount: 0.014; speed: 0.0017">
+        <a-plane width="0.92" height="0.52" material="shader: flat; color: #09000b; transparent: true; opacity: 0.86"></a-plane>
+        <a-plane position="0 0 0.006" width="0.84" height="0.44" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.08" animation="property: material.opacity; from: 0.05; to: 0.15; dur: 1500; dir: alternate; loop: true; easing: easeInOutSine"></a-plane>
+        <a-text value="LIBER 333" position="0 0.10 0.012" align="center" color="#ffe6ed" width="2.2" material="shader: flat"></a-text>
+        <a-text value="TAP TO OPEN" position="0 -0.07 0.012" align="center" color="#ff5d86" width="1.8" material="shader: flat"></a-text>
       </a-entity>
-      <a-gltf-model id="secondary-cabinet-left" src="#model-cabinet-left" position="-3.35 0 -2.08" rotation="0 56 0" fit-model="height: 1.78; center: true; floor: true" hide-on-model-ready="target: #left-cabinet-proxy"></a-gltf-model>
 
-      <a-entity id="right-cabinet-proxy" position="3.35 0 -2.08" rotation="0 -56 0">
-        <a-box position="0 0.9 0" width="1.0" height="1.8" depth="0.62" material="color: #05000a; metalness: 0.28; roughness: 0.62"></a-box>
-        <a-plane position="0 1.28 0.32" width="0.72" height="0.46" material="shader: flat; color: #ffb36b; transparent: true; opacity: 0.18"></a-plane>
+      <a-box id="liber-333-hitbox" class="clickable" position="0 1.12 -2.15" width="1.35" height="2.05" depth="0.66" material="color: #ff0038; transparent: true; opacity: 0.001; depthWrite: false" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle" animation__hoveron="property: scale; startEvents: oracle-hover-on; to: 1.018 1.018 1.018; dur: 120; easing: easeOutQuad" animation__hoveroff="property: scale; startEvents: oracle-hover-off; to: 1 1 1; dur: 180; easing: easeOutQuad"></a-box>
+
+      <a-entity id="liber-333-floor-marker" position="0 0.034 -1.72" class="clickable" oracle-link="url: https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/; label: Opening Liber 333 Oracle">
+        <a-circle rotation="-90 0 0" radius="0.43" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.052; side: double" animation="property: material.opacity; from: 0.030; to: 0.085; dur: 1200; dir: alternate; loop: true; easing: easeInOutSine"></a-circle>
+        <a-image src="#sigil-marker" position="0 0.006 0" rotation="-90 0 0" width="0.58" height="0.58" material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double" animation="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 18000; easing: linear"></a-image>
       </a-entity>
-      <a-gltf-model id="secondary-cabinet-right" src="#model-cabinet-right" position="3.35 0 -2.08" rotation="0 -56 0" fit-model="height: 1.78; center: true; floor: true" hide-on-model-ready="target: #right-cabinet-proxy"></a-gltf-model>
     </a-entity>
 
-    <a-entity id="player-rig" position="0 0 0.75">
-      <a-entity id="camera" camera position="0 1.6 0" look-controls="touchEnabled: true; mouseEnabled: true; pointerLockEnabled: false" wasd-controls="acceleration: 18; fly: false">
-        <a-entity id="gaze-cursor" position="0 0 -1" cursor="fuse: false" raycaster="objects: .clickable; far: 10; interval: 80" geometry="primitive: ring; radiusInner: 0.006; radiusOuter: 0.011; segmentsTheta: 32" material="shader: flat; color: #ffffff; opacity: 0.9" animation__click="property: scale; startEvents: click; from: 0.55 0.55 0.55; to: 1 1 1; dur: 160; easing: easeOutQuad"></a-entity>
+    <a-entity id="player-rig" position="0 0 0.55">
+      <a-entity id="camera" camera position="0 1.6 0" look-controls="touchEnabled: true; mouseEnabled: true; pointerLockEnabled: false" wasd-controls="acceleration: 14; fly: false">
+        <a-entity id="gaze-cursor" position="0 0 -1" cursor="fuse: false" raycaster="objects: .clickable; far: 7; interval: 80" geometry="primitive: ring; radiusInner: 0.006; radiusOuter: 0.011; segmentsTheta: 32" material="shader: flat; color: #ffffff; opacity: 0.9" animation__click="property: scale; startEvents: click; from: 0.55 0.55 0.55; to: 1 1 1; dur: 160; easing: easeOutQuad"></a-entity>
       </a-entity>
-
-      <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .clickable; far: 10; interval: 80" line="color: #ff0038; opacity: 0.55"></a-entity>
-      <a-entity id="left-controller" laser-controls="hand: left" raycaster="objects: .clickable; far: 10; interval: 80" line="color: #65dfff; opacity: 0.32"></a-entity>
+      <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .clickable; far: 7; interval: 80" line="color: #ff0038; opacity: 0.55"></a-entity>
+      <a-entity id="left-controller" laser-controls="hand: left" raycaster="objects: .clickable; far: 7; interval: 80" line="color: #65dfff; opacity: 0.32"></a-entity>
     </a-entity>
   </a-scene>
 </body>
