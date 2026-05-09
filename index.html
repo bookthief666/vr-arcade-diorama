@@ -1723,6 +1723,147 @@ AFRAME.registerComponent("liber-333-link", {
 });
 </script>
 
+
+<script>
+if (window.AFRAME && !AFRAME.components["electric-rail"]) {
+  AFRAME.registerComponent("electric-rail", {
+    schema: {
+      shape: { default: "rect" },
+      width: { default: 2.0 },
+      height: { default: 2.0 },
+      radius: { default: 1.0 },
+      innerRadius: { default: 0.45 },
+      color: { default: "#ff0038" },
+      opacity: { default: 0.95 },
+      jitter: { default: 0.04 },
+      subdivisions: { default: 7 },
+      speed: { default: 55 }
+    },
+
+    init: function () {
+      this.material = new THREE.LineBasicMaterial({
+        color: new THREE.Color(this.data.color),
+        transparent: true,
+        opacity: this.data.opacity,
+        depthWrite: false
+      });
+
+      this.geometry = new THREE.BufferGeometry();
+      this.line = new THREE.LineSegments(this.geometry, this.material);
+      this.el.object3D.add(this.line);
+      this.lastBuild = 0;
+      this.rebuild();
+    },
+
+    makeRect: function () {
+      const w = this.data.width / 2;
+      const h = this.data.height / 2;
+      return [
+        new THREE.Vector3(-w, -h, 0),
+        new THREE.Vector3( w, -h, 0),
+        new THREE.Vector3( w,  h, 0),
+        new THREE.Vector3(-w,  h, 0)
+      ];
+    },
+
+    makeOctagon: function () {
+      const r = this.data.radius;
+      const pts = [];
+      for (let i = 0; i < 8; i++) {
+        const a = Math.PI / 8 + i * Math.PI * 2 / 8;
+        pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+      }
+      return pts;
+    },
+
+    makeStar7: function () {
+      const pts = [];
+      const r1 = this.data.radius;
+      const r2 = this.data.innerRadius;
+      for (let i = 0; i < 14; i++) {
+        const r = i % 2 === 0 ? r1 : r2;
+        const a = -Math.PI / 2 + i * Math.PI * 2 / 14;
+        pts.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0));
+      }
+      return pts;
+    },
+
+    jittered: function (v) {
+      const j = this.data.jitter;
+      return new THREE.Vector3(
+        v.x + (Math.random() - 0.5) * j,
+        v.y + (Math.random() - 0.5) * j,
+        v.z + (Math.random() - 0.5) * j
+      );
+    },
+
+    rebuild: function () {
+      let pts;
+      if (this.data.shape === "octagon") pts = this.makeOctagon();
+      else if (this.data.shape === "star7") pts = this.makeStar7();
+      else pts = this.makeRect();
+
+      const verts = [];
+      const sub = Math.max(2, this.data.subdivisions);
+
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i];
+        const b = pts[(i + 1) % pts.length];
+        let last = this.jittered(a);
+
+        for (let k = 1; k <= sub; k++) {
+          const t = k / sub;
+          const next = this.jittered(new THREE.Vector3(
+            a.x + (b.x - a.x) * t,
+            a.y + (b.y - a.y) * t,
+            a.z + (b.z - a.z) * t
+          ));
+
+          verts.push(last.x, last.y, last.z, next.x, next.y, next.z);
+          last = next;
+        }
+      }
+
+      this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
+      this.geometry.computeBoundingSphere();
+
+      this.material.opacity = this.data.opacity * (0.35 + Math.random() * 0.65);
+      this.material.color.set(this.data.color);
+    },
+
+    tick: function (time) {
+      if (time - this.lastBuild > this.data.speed) {
+        this.lastBuild = time;
+        this.rebuild();
+      }
+    }
+  });
+}
+</script>
+
+
+<script>
+window.LIBER_333_URL = "https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/";
+
+if (window.AFRAME && !AFRAME.components["liber-333-link"]) {
+  AFRAME.registerComponent("liber-333-link", {
+    init: function () {
+      const openLiber = function (event) {
+        if (event) {
+          event.preventDefault && event.preventDefault();
+          event.stopPropagation && event.stopPropagation();
+        }
+
+        window.open(window.LIBER_333_URL, "_blank", "noopener");
+      };
+
+      this.el.addEventListener("click", openLiber);
+      this.el.addEventListener("touchend", openLiber);
+    }
+  });
+}
+</script>
+
 </head>
 
 
@@ -1829,14 +1970,7 @@ AFRAME.registerComponent("liber-333-link", {
     ></a-plane>
 
     <!-- BACKDROP: big flat plane now; later this receives background_clean.jpg -->
-    <a-image
-      id="reference-backplate"
-      src="#background-clean"
-      position="0 2.12 -4.55"
-      width="4.8"
-      height="4.8"
-      material="shader: flat; transparent: true; opacity: 0.45; side: double"
-    ></a-image>
+
 
     <!-- ARCADE CABINET TEMPLE LAYOUT: four left, four right, Liber Nox as central oracle altar -->
     <a-entity id="cabinet-temple-layout">
@@ -1844,8 +1978,193 @@ AFRAME.registerComponent("liber-333-link", {
       
       
       
-      <!-- LIBER SHRINE FRAME -->
-      <a-entity id="liber-shrine-frame" position="0 0 -3.18">
+      
+      
+      <!-- TEMPLE APSE PASS -->
+      
+
+      <!-- /TEMPLE APSE PASS -->
+
+
+      <!-- SKY DOME SIGIL FIELD -->
+      
+
+      <!-- /SKY DOME SIGIL FIELD -->
+
+<!-- TEMPLE ARCHITECTURE PASS -->
+      <a-entity id="temple-arcade-architecture">
+
+        <!-- Central obsidian altar dais -->
+        <a-cylinder
+          id="central-altar-dais"
+          position="0 0.035 -0.75"
+          radius="1.18"
+          height="0.07"
+          segments-radial="7"
+          rotation="0 30 0"
+          material="color: #070008; metalness: 0.35; roughness: 0.48">
+        </a-cylinder>
+
+        <a-ring
+          id="central-dais-red-circuit" animation__circuitpulse="property: material.opacity; from: 0.24; to: 0.95; dur: 360; dir: alternate; loop: true; easing: easeInOutSine"
+          position="0 0.078 -0.75"
+          rotation="-90 0 0"
+          radius-inner="1.04"
+          radius-outer="1.08"
+          segments-theta="7"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.55; side: double"
+          animation="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 42000; easing: linear">
+        </a-ring>
+
+        <!-- Side oracle plinths -->
+        <a-cylinder position="-1.45 0.025 -0.62" radius="0.72" height="0.05" segments-radial="48"
+          material="color: #050009; metalness: 0.25; roughness: 0.62"></a-cylinder>
+        <a-ring position="-1.45 0.065 -0.62" rotation="-90 0 0" radius-inner="0.66" radius-outer="0.70" segments-theta="64"
+          material="shader: flat; color: #65dfff; transparent: true; opacity: 0.32; side: double"></a-ring>
+
+        <a-cylinder position="1.45 0.025 -0.62" radius="0.72" height="0.05" segments-radial="48"
+          material="color: #050009; metalness: 0.25; roughness: 0.62"></a-cylinder>
+        <a-ring position="1.45 0.065 -0.62" rotation="-90 0 0" radius-inner="0.66" radius-outer="0.70" segments-theta="64"
+          material="shader: flat; color: #ff6a00; transparent: true; opacity: 0.23; side: double"></a-ring>
+
+        <!-- Obsidian / hard-light pylons framing the shrine -->
+        <a-box position="-1.05 1.16 -1.14" width="0.08" height="2.28" depth="0.08"
+          material="color: #090008; metalness: 0.72; roughness: 0.22"></a-box>
+        <a-box position="1.05 1.16 -1.14" width="0.08" height="2.28" depth="0.08"
+          material="color: #090008; metalness: 0.72; roughness: 0.22"></a-box>
+
+        <a-box position="-1.05 1.16 -1.08" width="0.018" height="2.18" depth="0.018"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.85"></a-box>
+        <a-box position="1.05 1.16 -1.08" width="0.018" height="2.18" depth="0.018"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.85"></a-box>
+
+        <a-box position="0 2.30 -1.10" width="2.42" height="0.055" depth="0.055"
+          material="color: #10000b; metalness: 0.62; roughness: 0.28"></a-box>
+        <a-box position="0 2.34 -1.06" width="2.28" height="0.018" depth="0.018"
+          material="shader: flat; color: #ff3366; transparent: true; opacity: 0.72"></a-box>
+
+        <!-- Peripheral black-chrome temple pillars -->
+        <a-cylinder position="-3.55 1.05 -2.28" radius="0.09" height="2.10" segments-radial="16"
+          material="color: #050006; metalness: 0.76; roughness: 0.24"></a-cylinder>
+        <a-cylinder position="3.55 1.05 -2.28" radius="0.09" height="2.10" segments-radial="16"
+          material="color: #050006; metalness: 0.76; roughness: 0.24"></a-cylinder>
+        <a-cylinder position="-3.55 2.18 -2.28" radius="0.13" height="0.05" segments-radial="7"
+          material="shader: flat; color: #6611ff; transparent: true; opacity: 0.50"></a-cylinder>
+        <a-cylinder position="3.55 2.18 -2.28" radius="0.13" height="0.05" segments-radial="7"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.55"></a-cylinder>
+
+        <!-- Ceiling rails, so the room stops feeling like an empty box -->
+        <a-box position="-1.85 2.75 -2.85" rotation="0 0 0" width="2.6" height="0.025" depth="0.025"
+          material="shader: flat; color: #65dfff; transparent: true; opacity: 0.24"></a-box>
+        <a-box position="1.85 2.75 -2.85" rotation="0 0 0" width="2.6" height="0.025" depth="0.025"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.28"></a-box>
+        <a-box position="0 2.82 -3.95" rotation="0 0 0" width="4.8" height="0.035" depth="0.035"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.18"></a-box>
+
+      </a-entity>
+      <!-- /TEMPLE ARCHITECTURE PASS -->
+
+<!-- LIBER SHRINE FRAME -->
+      
+      <!-- CENTRAL ISLAND WALKAROUND PASS -->
+\n
+
+
+      <!-- LIBER 333 SCREEN PENTAGRAM PASS -->
+      <a-entity
+        id="liber-333-screen-pentagram"
+        class="clickable"
+        liber-333-link
+        position="0 1.45 -0.185"
+        rotation="0 0 0">
+
+        <!-- Invisible precise hit area, fitted to the cabinet screen -->
+        <a-plane
+          id="liber-333-screen-hitbox"
+          class="clickable"
+          liber-333-link
+          width="0.72"
+          height="0.44"
+          position="0 0 0.035"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.001; side: double">
+        </a-plane>
+
+        <!-- Dark glass screen tint, not covering the whole cabinet -->
+        <a-plane
+          width="0.70"
+          height="0.42"
+          position="0 0 0.010"
+          material="shader: flat; color: #020005; transparent: true; opacity: 0.38; side: double">
+        </a-plane>
+
+        <!-- Spinning pentagram / star -->
+        <a-entity
+          position="0 0 0.050"
+          electric-rail="shape: star7; radius: 0.205; innerRadius: 0.082; color: #ff0038; opacity: 0.95; jitter: 0.022; subdivisions: 5; speed: 32"
+          animation="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 6200; easing: linear">
+        </a-entity>
+
+        <!-- Inner cyan ghost star -->
+        <a-entity
+          position="0 0 0.052"
+          electric-rail="shape: star7; radius: 0.145; innerRadius: 0.058; color: #65dfff; opacity: 0.50; jitter: 0.014; subdivisions: 4; speed: 44"
+          animation="property: rotation; from: 0 0 0; to: 0 0 -360; loop: true; dur: 4100; easing: linear">
+        </a-entity>
+
+        <!-- Pulsing screen aura -->
+        <a-ring
+          position="0 0 0.045"
+          radius-inner="0.245"
+          radius-outer="0.258"
+          segments-theta="96"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.40; side: double"
+          animation__pulse="property: material.opacity; from: 0.14; to: 0.68; dur: 180; dir: alternate; loop: true; easing: linear">
+        </a-ring>
+
+        <a-text
+          value="333"
+          position="0 -0.005 0.060"
+          align="center"
+          width="0.62"
+          color="#ffe6ee"
+          material="shader: flat; transparent: true; opacity: 0.88"
+          animation__numflicker="property: material.opacity; from: 0.20; to: 0.95; dur: 75; dir: alternate; loop: true; easing: linear">
+        </a-text>
+      </a-entity>
+      <!-- /LIBER 333 SCREEN PENTAGRAM PASS -->
+
+<a-entity id="central-walkaround-island">
+        <a-ring
+          position="0 0.070 -0.55"
+          rotation="-90 0 0"
+          radius-inner="1.70"
+          radius-outer="1.76"
+          segments-theta="64"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.36; side: double"
+          animation__islandpulse="property: material.opacity; from: 0.20; to: 0.68; dur: 780; dir: alternate; loop: true; easing: easeInOutSine">
+        </a-ring>
+
+        <a-ring
+          position="0 0.082 -0.55"
+          rotation="-90 0 0"
+          radius-inner="2.18"
+          radius-outer="2.22"
+          segments-theta="8"
+          material="shader: flat; color: #65dfff; transparent: true; opacity: 0.18; side: double"
+          animation__outerpulse="property: material.opacity; from: 0.10; to: 0.36; dur: 1040; dir: alternate; loop: true; easing: easeInOutSine">
+        </a-ring>
+
+        <a-plane
+          position="0 0.055 -0.55"
+          rotation="-90 0 0"
+          width="3.35"
+          height="2.45"
+          material="shader: flat; color: #050006; transparent: true; opacity: 0.18; side: double">
+        </a-plane>
+      </a-entity>
+      <!-- /CENTRAL ISLAND WALKAROUND PASS -->
+
+<a-entity id="liber-shrine-frame" position="0 0 -1.00">
         <a-box position="-0.78 1.28 0" width="0.035" height="2.2" depth="0.035" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.62"></a-box>
         <a-box position="0.78 1.28 0" width="0.035" height="2.2" depth="0.035" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.62"></a-box>
         <a-box position="0 2.36 0" width="1.62" height="0.035" depth="0.035" material="shader: flat; color: #ff0038; transparent: true; opacity: 0.55"></a-box>
@@ -1854,94 +2173,75 @@ AFRAME.registerComponent("liber-333-link", {
       <!-- /LIBER SHRINE FRAME -->
 
 <!-- BABALON STAR HALO -->
-      <a-entity id="babalon-star-halo" position="0 2.18 -3.42" rotation="0 0 0">
-        <a-ring
-          radius-inner="0.58"
-          radius-outer="0.62"
-          segments-theta="96"
-          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.34; side: double"
-          animation="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 24000; easing: linear">
-        </a-ring>
+      
 
-        <a-ring
-          radius-inner="0.36"
-          radius-outer="0.39"
-          segments-theta="7"
-          material="shader: flat; color: #ff4b7f; transparent: true; opacity: 0.50; side: double"
-          animation="property: rotation; from: 0 0 0; to: 0 0 -360; loop: true; dur: 18000; easing: linear">
-        </a-ring>
-
-        <a-image
-          src="#sigil-custom-img"
-          width="1.28"
-          height="1.28"
-          material="shader: flat; transparent: true; opacity: 0.50; side: double"
-          animation="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; dur: 36000; easing: linear">
-        </a-image>
-
-        <a-light
-          type="point"
-          color="#ff0038"
-          intensity="0.85"
-          distance="3.2"
-          decay="1.8">
-        </a-light>
-      </a-entity>
       <!-- /BABALON STAR HALO -->
 
 
       <!-- PRIESTESS ALCOVE LIGHTS -->
       <a-entity id="priestess-alcove-lights">
-        <a-light type="point" color="#4211ff" intensity="0.85" distance="2.4" decay="1.6" position="-2.85 1.05 -2.15"></a-light>
-        <a-light type="point" color="#ff0038" intensity="1.05" distance="2.6" decay="1.6" position="2.85 1.05 -2.15"></a-light>
-        <a-light type="point" color="#ff336f" intensity="1.25" distance="2.2" decay="1.7" position="-1.05 0.95 -2.10"></a-light>
-        <a-light type="point" color="#ff174f" intensity="1.25" distance="2.2" decay="1.7" position="1.05 0.95 -2.10"></a-light>
+        <a-light type="point" color="#4211ff" intensity="0.85" distance="2.4" decay="1.6" position="-1.55 1.05 -0.42"></a-light>
+        <a-light type="point" color="#ff0038" intensity="1.05" distance="2.6" decay="1.6" position="1.55 1.05 -0.42"></a-light>
+        <a-light type="point" color="#ff336f" intensity="1.25" distance="2.2" decay="1.7" position="-0.82 0.95 -0.10"></a-light>
+        <a-light type="point" color="#ff174f" intensity="1.25" distance="2.2" decay="1.7" position="0.82 0.95 -0.10"></a-light>
       </a-entity>
       <!-- /PRIESTESS ALCOVE LIGHTS -->
 
-<!-- COMPACT LIBER TEMPLE -->
+
+      <!-- CURVED WALL GALLERY DEPTH -->
+      
+
+      <!-- /CURVED WALL GALLERY DEPTH -->
+
+      <!-- COMPACT LIBER TEMPLE -->
 
       <a-gltf-model
         id="cabinet-left"
         src="#cabinet-02-glb"
-        position="-2.35 0 -2.65"
-        rotation="0 20 0"
+        position="-1.45 0 -0.62"
+        rotation="0 32 0"
         fit-model="height: 1.72">
       </a-gltf-model>
 
       <a-gltf-model
         id="liber-nox-cabinet"
         src="#liber-nox-glb"
-        position="0 0 -2.85"
+        position="0 0 -0.78"
         rotation="0 0 0"
-        fit-model="height: 2.02">
+        fit-model="height: 2.02" class="clickable">
       </a-gltf-model>
 
       <a-gltf-model
         id="cabinet-right"
         src="#cabinet-06-glb"
-        position="2.35 0 -2.65"
-        rotation="0 -20 0"
+        position="1.45 0 -0.62"
+        rotation="0 -32 0"
         fit-model="height: 1.72">
       </a-gltf-model>
 
-      <!-- LEFT PRIESTESS -->
+      <!-- TWO INTENTIONAL INNER PRIESTESSES ONLY -->
       <a-gltf-model
         id="priestess-left"
         src="#priestess-02-glb"
-        position="-1.15 0 -2.35"
-        rotation="0 18 0"
+        position="-0.82 0 -0.28"
+        rotation="0 10 0"
         fit-model="height: 1.58">
       </a-gltf-model>
 
-      <!-- RIGHT PRIESTESS -->
       <a-gltf-model
         id="priestess-right"
         src="#character-glb"
-        position="1.15 0 -2.35"
-        rotation="0 -18 0"
+        position="0.82 0 -0.28"
+        rotation="0 -10 0"
         fit-model="height: 1.58">
       </a-gltf-model>
+
+
+      <!-- LEFT PRIESTESS -->
+
+
+      <!-- RIGHT PRIESTESS -->
+
 
 
       <!-- LIBER NOX: central future oracle / future Liber 333 portal hook -->
@@ -1991,65 +2291,12 @@ AFRAME.registerComponent("liber-333-link", {
       </a-entity>
     </a-entity>
 
-    <a-entity
-      id="custom-neon-sigil"
-      position="1.78 2.30 -3.20"
-      rotation="0 -8 0"
-      animation__spin="property: rotation; from: 0 -8 0; to: 0 352 0; loop: true; dur: 26000; easing: linear"
-      animation__pulse="property: scale; from: 1 1 1; to: 1.05 1.05 1.05; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"
-    >
-      <!-- glow layer -->
-      <a-image
-        id="custom-neon-sigil-glow"
-        src="#sigil-custom-img"
-        position="0 0 0"
-        width="2.25"
-        height="2.25"
-        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.22; side: double"
-      ></a-image>
+    
 
-      <!-- crisp main layer -->
-      <a-image
-        id="custom-neon-sigil-core"
-        src="#sigil-custom-img"
-        position="0 0 0.01"
-        width="1.95"
-        height="1.95"
-        material="shader: flat; transparent: true; alphaTest: 0.01; opacity: 0.96; side: double"
-      ></a-image>
-    </a-entity>
-
-    <a-entity id="character-light-rig">
-      <!-- soft front fill so the 3D character is not a black silhouette -->
-      <a-entity
-        light="type: point; color: #ffd0c8; intensity: 2.2; distance: 4.0; decay: 1.4"
-        position="0.25 2.15 0.15"
-      ></a-entity>
-
-      <!-- cool arcade-blue rim light -->
-      <a-entity
-        light="type: point; color: #4f8cff; intensity: 1.15; distance: 3.5; decay: 1.6"
-        position="-1.25 1.75 -1.20"
-      ></a-entity>
-
-      <!-- red sigil/back glow -->
-      <a-entity
-        light="type: point; color: #ff1a44; intensity: 1.45; distance: 4.2; decay: 1.5"
-        position="1.75 2.05 -2.85"
-      ></a-entity>
-    </a-entity>
 
     
 
-    <a-image
-      id="character-cutout" visible="false"
-      src="#character-img"
-      position="0.38 1.42 -2.08"
-      rotation="0 -3 0"
-      width="1.48"
-      height="2.96"
-      material="shader: flat; transparent: true; alphaTest: 0.01; side: double"
-    ></a-image>
+
 
     <!-- WRAP PANELS: theatrical set walls, not a literal room -->
     <a-plane
@@ -2675,17 +2922,7 @@ AFRAME.registerComponent("liber-333-link", {
     <a-entity id="backdrop-depth-rig">
 
       <!-- subtle enlarged ghost layer: creates depth/parallax shimmer -->
-      <a-plane
-        id="backdrop-depth-ghost"
-        src="#background-clean"
-        position="0.04 2.13 -4.48"
-        rotation="0 -1 0"
-        width="4.95"
-        height="4.95"
-        material="shader: flat; transparent: true; opacity: 0.16; side: double"
-        animation__depthpulse="property: material.opacity; from: 0.08; to: 0.19; dir: alternate; loop: true; dur: 4200; easing: easeInOutSine"
-        animation__depthscale="property: scale; from: 1 1 1; to: 1.018 1.018 1.018; dir: alternate; loop: true; dur: 6200; easing: easeInOutSine"
-      ></a-plane>
+
 
       <!-- red vertical glow side layer -->
       <a-plane
@@ -2766,6 +3003,335 @@ AFRAME.registerComponent("liber-333-link", {
       depth="0.08"
       material="opacity: 0.001; transparent: true; color: #ff0055">
     </a-box>
+
+
+      <!-- DIRECT URL FLOOR FIX -->
+      <a-plane
+        id="direct-floor-black-base"
+        position="0 0.004 0"
+        rotation="-90 0 0"
+        width="8.8"
+        height="8.8"
+        material="shader: flat; color: #020003; side: double">
+      </a-plane>
+
+      <a-plane
+        id="direct-floor-pattern"
+        position="0 0.035 0"
+        rotation="-90 0 0"
+        width="8.55"
+        height="8.55"
+        material="shader: flat; src: url(assets/images/floor_led_pattern.png); repeat: 3.4 3.4; transparent: true; opacity: 1; side: double">
+      </a-plane>
+
+      <a-ring
+        id="direct-floor-edge"
+        position="0 0.058 0"
+        rotation="-90 0 0"
+        radius-inner="3.92"
+        radius-outer="4.06"
+        segments-theta="8"
+        material="shader: flat; color: #ff0038; transparent: true; opacity: 0.62; side: double"
+        animation__edgepulse="property: material.opacity; from: 0.25; to: 0.90; dur: 480; dir: alternate; loop: true; easing: easeInOutSine">
+      </a-ring>
+      <!-- /DIRECT URL FLOOR FIX -->
+
+<a-entity id="true-octagon-room-shell">
+      <!-- TRUE ENCLOSING OCTAGON ROOM -->
+
+      <a-plane position="0 1.62 -4.05" rotation="0 0 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_01.jpg" position="0 1.62 -4.05" rotation="0 0 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.64; side: double"></a-image>
+
+      <a-plane position="-2.86 1.62 -2.86" rotation="0 45 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_02.jpg" position="-2.86 1.62 -2.86" rotation="0 45 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.58; side: double"></a-image>
+
+      <a-plane position="-4.05 1.62 0" rotation="0 90 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_03.jpg" position="-4.05 1.62 0" rotation="0 90 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.52; side: double"></a-image>
+
+      <a-plane position="-2.86 1.62 2.86" rotation="0 135 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_04.jpg" position="-2.86 1.62 2.86" rotation="0 135 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.46; side: double"></a-image>
+
+      <a-plane position="0 1.62 4.05" rotation="0 180 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_05.jpg" position="0 1.62 4.05" rotation="0 180 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.42; side: double"></a-image>
+
+      <a-plane position="2.86 1.62 2.86" rotation="0 -135 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_06.jpg" position="2.86 1.62 2.86" rotation="0 -135 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.46; side: double"></a-image>
+
+      <a-plane position="4.05 1.62 0" rotation="0 -90 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_07.jpg" position="4.05 1.62 0" rotation="0 -90 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.52; side: double"></a-image>
+
+      <a-plane position="2.86 1.62 -2.86" rotation="0 -45 0" width="3.38" height="3.28"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.96; side: double"></a-plane>
+      <a-image src="assets/images/walls/wall_08.jpg" position="2.86 1.62 -2.86" rotation="0 -45 0" width="3.14" height="2.88"
+        material="shader: flat; transparent: true; opacity: 0.58; side: double"></a-image>
+
+      <a-cylinder position="-1.69 1.62 -4.05" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-cylinder position="1.69 1.62 -4.05" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-cylinder position="-4.05 1.62 -1.69" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-cylinder position="-4.05 1.62 1.69" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-cylinder position="-1.69 1.62 4.05" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-cylinder position="1.69 1.62 4.05" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-cylinder position="4.05 1.62 1.69" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-cylinder position="4.05 1.62 -1.69" radius="0.055" height="3.28"
+        material="color: #070007; metalness: 0.82; roughness: 0.20"></a-cylinder>
+
+      <a-ring position="0 3.25 0" rotation="-90 0 0" radius-inner="3.96" radius-outer="4.06" segments-theta="8"
+        material="shader: flat; color: #ff0038; transparent: true; opacity: 0.44; side: double"></a-ring>
+      <a-ring position="0 0.055 0" rotation="-90 0 0" radius-inner="3.96" radius-outer="4.06" segments-theta="8"
+        material="shader: flat; color: #ff0038; transparent: true; opacity: 0.30; side: double"></a-ring>
+      <a-circle position="0 3.34 0" rotation="-90 0 0" radius="4.08" segments="8"
+        material="shader: flat; color: #020003; transparent: true; opacity: 0.46; side: double"></a-circle>
+    </a-entity>
+
+
+      <!-- ELECTRIC STORM PASS -->
+
+      <!-- Jagged electric shrine frame around Liber cabinet -->
+      <a-entity
+        id="electric-shrine-frame-red"
+        position="0 1.24 -0.94"
+        electric-rail="shape: rect; width: 2.18; height: 2.58; color: #ff0038; opacity: 0.98; jitter: 0.075; subdivisions: 8; speed: 42">
+      </a-entity>
+
+      <a-entity
+        id="electric-shrine-frame-cyan-ghost"
+        position="0 1.24 -0.92"
+        electric-rail="shape: rect; width: 2.28; height: 2.68; color: #65dfff; opacity: 0.34; jitter: 0.11; subdivisions: 6; speed: 65">
+      </a-entity>
+
+      <!-- Jagged electric octagon boundaries -->
+      <a-entity
+        id="electric-octagon-top-red"
+        position="0 3.27 0"
+        electric-rail="shape: octagon; radius: 4.04; color: #ff0038; opacity: 0.86; jitter: 0.10; subdivisions: 9; speed: 48">
+      </a-entity>
+
+      <a-entity
+        id="electric-octagon-top-cyan"
+        position="0 3.30 0"
+        electric-rail="shape: octagon; radius: 3.96; color: #65dfff; opacity: 0.28; jitter: 0.13; subdivisions: 7; speed: 70">
+      </a-entity>
+
+      <a-entity
+        id="electric-octagon-floor-red"
+        position="0 0.075 0"
+        electric-rail="shape: octagon; radius: 4.04; color: #ff0038; opacity: 0.72; jitter: 0.08; subdivisions: 8; speed: 52">
+      </a-entity>
+
+      <!-- Babalon stars in the sky: large, distant, jagged, multiple -->
+      
+
+
+      
+
+
+      
+
+
+      
+
+
+      <!-- Extra crawling arcs around the cabinet face -->
+      <a-entity
+        id="electric-cabinet-face-star"
+        position="0 2.18 -0.78"
+        rotation="0 0 0"
+        electric-rail="shape: star7; radius: 0.62; innerRadius: 0.25; color: #ff0038; opacity: 0.85; jitter: 0.055; subdivisions: 6; speed: 46">
+      </a-entity>
+
+      <!-- /ELECTRIC STORM PASS -->
+
+
+      <!-- BABALON CONE ROOF V2 -->
+      <a-entity id="babalon-cone-roof-v2">
+
+        <!-- Lowest / largest roof star directly above player, like a ceiling mandala -->
+        <a-entity
+          id="roof-star-base-red"
+          position="0 3.18 0"
+          rotation="-90 0 0"
+          electric-rail="shape: star7; radius: 3.86; innerRadius: 1.58; color: #ff0038; opacity: 1.0; jitter: 0.18; subdivisions: 11; speed: 42">
+        </a-entity>
+
+        <a-entity
+          id="roof-star-base-cyan"
+          position="0 3.23 0"
+          rotation="-90 0 10"
+          electric-rail="shape: star7; radius: 3.98; innerRadius: 1.68; color: #65dfff; opacity: 0.46; jitter: 0.24; subdivisions: 9; speed: 66">
+        </a-entity>
+
+        <!-- Progressive shrinking stars forming cone/pyramid roof -->
+        <a-entity
+          id="roof-star-second"
+          position="0 3.88 0"
+          rotation="-90 0 18"
+          electric-rail="shape: star7; radius: 3.05; innerRadius: 1.25; color: #ff3366; opacity: 0.90; jitter: 0.15; subdivisions: 10; speed: 50">
+        </a-entity>
+
+        <a-entity
+          id="roof-star-third"
+          position="0 4.58 0"
+          rotation="-90 0 -14"
+          electric-rail="shape: star7; radius: 2.22; innerRadius: 0.90; color: #ff0038; opacity: 0.82; jitter: 0.13; subdivisions: 9; speed: 58">
+        </a-entity>
+
+        <a-entity
+          id="roof-star-fourth"
+          position="0 5.25 0"
+          rotation="-90 0 27"
+          electric-rail="shape: star7; radius: 1.42; innerRadius: 0.58; color: #ff4b7f; opacity: 0.74; jitter: 0.11; subdivisions: 8; speed: 65">
+        </a-entity>
+
+        <a-entity
+          id="roof-star-apex"
+          position="0 5.92 0"
+          rotation="-90 0 0"
+          electric-rail="shape: star7; radius: 0.70; innerRadius: 0.28; color: #65dfff; opacity: 0.62; jitter: 0.09; subdivisions: 7; speed: 74">
+        </a-entity>
+
+        <!-- Octagonal cone bands -->
+        <a-entity
+          id="roof-octagon-base"
+          position="0 3.10 0"
+          electric-rail="shape: octagon; radius: 4.06; color: #ff0038; opacity: 0.92; jitter: 0.09; subdivisions: 10; speed: 50">
+        </a-entity>
+
+        <a-entity
+          id="roof-octagon-mid"
+          position="0 4.30 0"
+          electric-rail="shape: octagon; radius: 2.58; color: #ff0038; opacity: 0.58; jitter: 0.08; subdivisions: 8; speed: 62">
+        </a-entity>
+
+        <a-entity
+          id="roof-octagon-high"
+          position="0 5.34 0"
+          electric-rail="shape: octagon; radius: 1.28; color: #65dfff; opacity: 0.42; jitter: 0.07; subdivisions: 7; speed: 76">
+        </a-entity>
+
+        <!-- Dark translucent cone planes so it reads like a ceiling/roof rather than floating line art -->
+        <a-circle
+          position="0 3.06 0"
+          rotation="-90 0 0"
+          radius="4.08"
+          segments="8"
+          material="shader: flat; color: #020003; transparent: true; opacity: 0.28; side: double">
+        </a-circle>
+
+      </a-entity>
+      <!-- /BABALON CONE ROOF V2 -->
+
+
+      <!-- CABINET BRIGHTNESS AND WALL VEIL PASS -->
+
+      <!-- Make Liber Nox cabinet readable again -->
+      <a-entity id="liber-nox-light-boost">
+        <a-light
+          type="point"
+          color="#ff174f"
+          intensity="2.4"
+          distance="2.6"
+          decay="1.35"
+          position="0 1.22 -0.28">
+        </a-light>
+
+        <a-light
+          type="point"
+          color="#65dfff"
+          intensity="1.1"
+          distance="2.0"
+          decay="1.55"
+          position="0 1.55 -0.21">
+        </a-light>
+
+        <a-plane
+          position="0 1.36 -0.15"
+          width="0.82"
+          height="0.48"
+          material="shader: flat; color: #ff0038; transparent: true; opacity: 0.16; side: double"
+          animation__screenpulse="property: material.opacity; from: 0.10; to: 0.28; dur: 700; dir: alternate; loop: true; easing: easeInOutSine">
+        </a-plane>
+
+        <a-plane
+          position="0 1.35 -0.145"
+          width="0.58"
+          height="0.30"
+          material="shader: flat; color: #65dfff; transparent: true; opacity: 0.08; side: double"
+          animation__cyanpulse="property: material.opacity; from: 0.04; to: 0.18; dur: 940; dir: alternate; loop: true; easing: easeInOutSine">
+        </a-plane>
+      </a-entity>
+
+      <!-- Dark veils over side wall art so baked-in wall figures stop reading as extra priestesses -->
+      <a-entity id="side-wall-figure-veils">
+        <a-plane
+          position="-2.86 1.62 -2.82"
+          rotation="0 45 0"
+          width="3.10"
+          height="2.85"
+          material="shader: flat; color: #020003; transparent: true; opacity: 0.34; side: double">
+        </a-plane>
+
+        <a-plane
+          position="2.86 1.62 -2.82"
+          rotation="0 -45 0"
+          width="3.10"
+          height="2.85"
+          material="shader: flat; color: #020003; transparent: true; opacity: 0.34; side: double">
+        </a-plane>
+
+        <a-plane
+          position="-4.00 1.62 0"
+          rotation="0 90 0"
+          width="3.10"
+          height="2.85"
+          material="shader: flat; color: #020003; transparent: true; opacity: 0.28; side: double">
+        </a-plane>
+
+        <a-plane
+          position="4.00 1.62 0"
+          rotation="0 -90 0"
+          width="3.10"
+          height="2.85"
+          material="shader: flat; color: #020003; transparent: true; opacity: 0.28; side: double">
+        </a-plane>
+      </a-entity>
+
+      <!-- /CABINET BRIGHTNESS AND WALL VEIL PASS -->
+
+
+      <!-- Mouse/touch cursor for clickable arcade screen objects -->
+      <a-entity
+        id="mouse-touch-raycaster"
+        cursor="rayOrigin: mouse; fuse: false"
+        raycaster="objects: .clickable; far: 20">
+      </a-entity>
 
 </a-scene>
 
@@ -3426,6 +3992,236 @@ if (window.AFRAME && !AFRAME.components["occult-arcade-screen"]) {
     window.open("https://liber-333-grimoire-3sv4fabpa-bookthiefs-projects.vercel.app/", "_blank", "noopener,noreferrer");
   };
 </script>
+
+
+<!-- GESTURE MOVEMENT CONTROLS -->
+<style>
+  html, body, canvas, .a-canvas {
+    touch-action: none !important;
+    overscroll-behavior: none !important;
+  }
+
+  #gesture-move-status {
+    position: fixed;
+    left: 16px;
+    bottom: 82px;
+    z-index: 9999;
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 0, 56, 0.52);
+    border-radius: 9px;
+    background: rgba(0, 0, 0, 0.68);
+    color: rgba(255, 225, 235, 0.82);
+    font: 800 10px/1.25 system-ui, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(255,0,56,.65);
+  }
+</style>
+
+<div id="gesture-move-status">2 FINGERS: PAN / PINCH</div>
+
+<script>
+(function () {
+  let active = false;
+  let last = null;
+  let lastDistance = 0;
+
+  const STRAFE_SPEED = 0.008;
+  const VERTICAL_SPEED = 0.007;
+  const PINCH_SPEED = 0.014;
+  const ROOM_BOUND = 5.25;
+  const MIN_Y = -0.05;
+  const MAX_Y = 4.25;
+
+  function status(text) {
+    const el = document.getElementById("gesture-move-status");
+    if (el) el.textContent = text;
+  }
+
+  function getScene() {
+    return document.querySelector("a-scene");
+  }
+
+  function getActiveCameraObject() {
+    const scene = getScene();
+    if (!scene) return null;
+
+    if (scene.camera) return scene.camera;
+
+    const camEl =
+      document.querySelector("[camera][data-aframe-default-camera]") ||
+      document.querySelector("[camera]") ||
+      document.querySelector("a-camera");
+
+    return camEl && camEl.object3D ? camEl.object3D : null;
+  }
+
+  function getMoveObject() {
+    const scene = getScene();
+    const camObj = getActiveCameraObject();
+
+    const rigEl =
+      document.querySelector("#player-rig") ||
+      document.querySelector("#cameraRig") ||
+      document.querySelector("#camera-rig");
+
+    if (rigEl && rigEl.object3D) return rigEl.object3D;
+
+    // If no rig exists, move the camera's parent if it is not the scene.
+    if (camObj && camObj.parent && scene && camObj.parent !== scene.object3D) {
+      return camObj.parent;
+    }
+
+    // Last resort: move the camera itself.
+    return camObj;
+  }
+
+  function centerAndDistance(touches) {
+    if (!touches || touches.length < 2) return null;
+
+    const a = touches[0];
+    const b = touches[1];
+
+    const cx = (a.clientX + b.clientX) / 2;
+    const cy = (a.clientY + b.clientY) / 2;
+
+    const dx = b.clientX - a.clientX;
+    const dy = b.clientY - a.clientY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    return { x: cx, y: cy, dist };
+  }
+
+  function moveRig(dx, dy, pinch) {
+    const camObj = getActiveCameraObject();
+    const moveObj = getMoveObject();
+
+    if (!camObj || !moveObj || !window.THREE) {
+      status("NO ACTIVE CAMERA");
+      return;
+    }
+
+    const forward = new THREE.Vector3();
+    camObj.getWorldDirection(forward);
+    if (forward.lengthSq() < 0.0001) forward.set(0, 0, -1);
+    forward.normalize();
+
+    const flatForward = forward.clone();
+    flatForward.y = 0;
+    if (flatForward.lengthSq() < 0.0001) flatForward.set(0, 0, -1);
+    flatForward.normalize();
+
+    const right = new THREE.Vector3(-flatForward.z, 0, flatForward.x).normalize();
+
+    // Two-finger horizontal drag = strafe.
+    moveObj.position.add(right.multiplyScalar(dx * STRAFE_SPEED));
+
+    // Two-finger vertical drag = rise/fall.
+    moveObj.position.y += -dy * VERTICAL_SPEED;
+
+    // Pinch = forward/back in look direction.
+    moveObj.position.add(forward.multiplyScalar(pinch * PINCH_SPEED));
+
+    const r = Math.sqrt(moveObj.position.x * moveObj.position.x + moveObj.position.z * moveObj.position.z);
+    if (r > ROOM_BOUND) {
+      const scale = ROOM_BOUND / r;
+      moveObj.position.x *= scale;
+      moveObj.position.z *= scale;
+    }
+
+    if (moveObj.position.y < MIN_Y) moveObj.position.y = MIN_Y;
+    if (moveObj.position.y > MAX_Y) moveObj.position.y = MAX_Y;
+
+    status(
+      "MOVE X " + moveObj.position.x.toFixed(1) +
+      " Y " + moveObj.position.y.toFixed(1) +
+      " Z " + moveObj.position.z.toFixed(1)
+    );
+  }
+
+  function onStart(e) {
+    if (!e.touches || e.touches.length < 2) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const state = centerAndDistance(e.touches);
+    if (!state) return;
+
+    active = true;
+    last = state;
+    lastDistance = state.dist;
+    status("GESTURE ACTIVE");
+  }
+
+  function onMove(e) {
+    if (!e.touches || e.touches.length < 2) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const state = centerAndDistance(e.touches);
+    if (!state) return;
+
+    if (!active || !last) {
+      active = true;
+      last = state;
+      lastDistance = state.dist;
+      return;
+    }
+
+    const dx = state.x - last.x;
+    const dy = state.y - last.y;
+    const pinch = state.dist - lastDistance;
+
+    last = state;
+    lastDistance = state.dist;
+
+    moveRig(dx, dy, pinch);
+  }
+
+  function onEnd(e) {
+    if (!e.touches || e.touches.length < 2) {
+      active = false;
+      last = null;
+      lastDistance = 0;
+      status("2 FINGERS: PAN / PINCH");
+    }
+  }
+
+  function bind() {
+    document.addEventListener("touchstart", onStart, { passive: false, capture: true });
+    document.addEventListener("touchmove", onMove, { passive: false, capture: true });
+    document.addEventListener("touchend", onEnd, { passive: false, capture: true });
+    document.addEventListener("touchcancel", onEnd, { passive: false, capture: true });
+
+    status("2 FINGERS: PAN / PINCH");
+    console.log("[GEIST] active-camera gesture movement bound");
+  }
+
+  window.addEventListener("DOMContentLoaded", function () {
+    setTimeout(bind, 750);
+  });
+})();
+</script>
+<!-- /GESTURE MOVEMENT CONTROLS -->
+\n
+<!-- PLAYER START POSE ANGLE -->
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  setTimeout(function () {
+    const rig = document.querySelector("#player-rig");
+    if (!rig || !rig.object3D) return;
+
+    rig.object3D.position.set(1.55, 0, 2.35);
+    rig.object3D.rotation.set(0, THREE.MathUtils.degToRad(-28), 0);
+
+    console.log("[GEIST] player start pose set: back-right diagonal view");
+  }, 900);
+});
+</script>
+<!-- /PLAYER START POSE ANGLE -->
 
 </body>
 </html>
